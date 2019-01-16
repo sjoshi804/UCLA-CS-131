@@ -24,3 +24,26 @@ let rec set_diff a b = List.filter (fun x -> not (List.mem x b))a
 that is sure not to be equal to any of the values tried earlier - because of it is, it is the fixed point or there is no fixed point *)
 let rec computed_fixed_point eq f x = if eq (f x) x then x else computed_fixed_point eq f (f x)
 
+type ('nonterminal, 'terminal) symbol =
+  | N of 'nonterminal
+  | T of 'terminal
+
+let filter_reachable g = 
+  let symbol = fst g in 
+  let rules = snd g in
+  let rec helper validRules = 
+    let revisedRules = List.filter(
+      fun currentTuple -> 
+      if List.mem currentTuple validRules then true 
+      else
+      List.exists (
+      fun vrTuple -> 
+        List.exists (
+          function
+          | T _ -> false 
+          | N item -> item = (fst currentTuple)) (snd vrTuple)) validRules
+          ) rules in
+    if validRules = revisedRules
+    then validRules
+    else helper revisedRules in 
+  (symbol, helper (List.filter (fun x -> fst x = symbol) rules))
