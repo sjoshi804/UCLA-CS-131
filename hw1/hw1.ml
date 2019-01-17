@@ -28,22 +28,26 @@ type ('nonterminal, 'terminal) symbol =
   | N of 'nonterminal
   | T of 'terminal
 
+(* Filter list of rules of grammar recursively by checking which rules can be reached from rules already reached - the first argument is 
+the set of all rules that have the starting symbol as the non-terminal symbol leading out *)
 let filter_reachable g = 
   let symbol = fst g in 
   let rules = snd g in
   let rec helper validRules = 
     let revisedRules = List.filter(
       fun currentTuple -> 
-      if List.mem currentTuple validRules then true 
-      else
+      if List.mem currentTuple validRules 
+      then true (* If current rule is already in valid rules then it stays valid so return true*)
+      else (* Else check if there is an 'edge' from a traversed 'node' i.e. rule to the current 'node' i.e. rule *)
       List.exists (
       fun vrTuple -> 
         List.exists (
           function
-          | T _ -> false 
-          | N item -> item = (fst currentTuple)) (snd vrTuple)) validRules
+          | T _ -> false (* If symbol is terminal it is relevant *)
+          | N item -> item = (fst currentTuple)) (snd vrTuple)) validRules (* Checks if rule's non-terminal occurs in the list corresponding to valid rule*)
           ) rules in
     if validRules = revisedRules
-    then validRules
+    then validRules (* Stop recursing when validRules doesn't change for a whole function call *)
     else helper revisedRules in 
-  (symbol, helper (List.filter (fun x -> fst x = symbol) rules))
+  (symbol, helper (List.filter (fun x -> fst x = symbol) rules)) (* Constructs the tuple for the grammar from reachable rules and the starting symbol. Also filters down list of rules to only those starting 
+  with the starting symbol *) 
