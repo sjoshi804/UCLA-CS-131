@@ -27,6 +27,7 @@ let rec computed_fixed_point eq f x = if eq (f x) x then x else computed_fixed_p
 type ('nonterminal, 'terminal) symbol =
   | N of 'nonterminal
   | T of 'terminal
+  
 (* Filter list of rules of grammar recursively by checking which rules can be reached from rules already reached - the first argument is 
 the set of all rules that have the starting symbol as the non-terminal symbol leading out *)
 let filter_reachable g = 

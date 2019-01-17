@@ -21,7 +21,7 @@ let my_set_diff_test0 = equal_sets (set_diff [1;2;3;] [4;2;3;1]) [] (* Subset te
 let my_set_diff_test1 = equal_sets (set_diff [3;1;7] [1;2;3;4]) [7] (* Regular test *)
 let my_set_diff_test2 = equal_sets (set_diff [10;11] []) [10;11] (* Empty set test *)
 let my_set_diff_test3 = equal_sets (set_diff [] [10; 11]) [] (* Empty set test 2 *)
-let my_set_diff_test3 = equal_sets (set_diff [4;3;1] [4;3;1]) [4;3;1] (* Equal set test *)
+let my_set_diff_test4 = equal_sets (set_diff [4;3;1] [4;3;1]) [] (* Equal set test *)
 
 let my_computed_fixed_point_test0 =
   computed_fixed_point (=) (fun x -> x / 10) 747234148 = 0 (* Converge at 0 with equality *)
