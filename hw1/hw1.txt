@@ -1,4 +1,4 @@
-Report of Homework 1:
+Report for Homework 1:
 1. Knowing that functional languages do not have the idea of iteration and instead using recursion, I knew I had to recurse and traverse the list. I figured out that the syntax for this uses the "::" operator to split an element into the 'head' - first element and 'tail' - rest of the list. This allowed me to traverse the list. The next step was to check if the element occurs in the second list, initially I achieved this using the List.exists and passing it a func that returned true iff the 'head' was found but then I later replaced this with the more succint List.mem.
 2. This was fairly straight-forward, I checked if 2 sets are equal by checking if they are subsets of each other as we do in regular math to show equality for two sets. 
 3. The union function was similar to my subset approach except here if an element wasn’t found, I added it to the second list. 
