@@ -19,3 +19,21 @@ let reverseAssociate list key = List.assoc key list
 i.e. grammar in hw2 - by taking as input grammar of hw1 *)
 let convert_grammar = function
   | (startingSymbol, rules) -> (startingSymbol, reverseAssociate (mergeRules rules))
+
+type ('nonterminal, 'terminal) symbol =
+    | N of 'nonterminal
+    | T of 'terminal
+
+type ('nonterminal, 'terminal) parse_tree =
+  | Node of 'nonterminal * ('nonterminal, 'terminal) parse_tree list
+  | Leaf of 'terminal
+
+(* Preorder traversal of parse tree to get leaves from left to right, do not add element if it is a non-terminal *)
+let rec parse_tree_leaves tree = function
+| Leaf symbol -> [symbol]
+| Node (_, children) -> parse_Children children
+and
+parseChildren = function
+| [] -> []
+| Leaf symbol::tail -> [symbol] @ parseChildren tail
+| Node symbol::tail -> parse_tree_leaves @ parseChildren tail
