@@ -42,9 +42,11 @@ parseChildren = function
 let actual_make_matcher = function
 | _ -> fun fr -> (Some (Leaf ""), Some "")
 
+(* Returns a function with a wrapper around the actual_matcher that returns what the acceptor returns*)
 let make_matcher grammar = 
 fun fragment acceptor -> snd ((actual_make_matcher grammar) fragment acceptor)
 
+(* Returns a function with a wrapper around the actual_matcher that has an accept_empty acceptor and returns the parse tree instead*)
 let make_parser grammar = 
   let accept_empty = function
   | "" -> Some ""
