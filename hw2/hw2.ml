@@ -29,11 +29,25 @@ type ('nonterminal, 'terminal) parse_tree =
   | Leaf of 'terminal
 
 (* Preorder traversal of parse tree to get leaves from left to right, do not add element if it is a non-terminal *)
-let rec parse_tree_leaves tree = function
+let rec parse_tree_leaves = function
 | Leaf symbol -> [symbol]
-| Node (_, children) -> parse_Children children
+| Node (_, children) -> parseChildren children
 and
 parseChildren = function
 | [] -> []
 | Leaf symbol::tail -> [symbol] @ parseChildren tail
-| Node symbol::tail -> parse_tree_leaves @ parseChildren tail
+| symbol::tail -> (parse_tree_leaves symbol) @ (parseChildren tail)
+
+(* Actual make_matcher creates the actual matcher function that takes a fragment and an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*))
+let actual_make_matcher = function
+| _ -> fun fr -> (Some (Leaf ""), Some "")
+
+let make_matcher grammar = 
+fun fragment acceptor -> snd ((actual_make_matcher grammar) fragment acceptor)
+
+let make_parser grammar = 
+  let accept_empty = function
+  | "" -> Some ""
+  | _ -> None in 
+  fun fragment -> fst ((actual_make_matcher grammar) fragment accept_empty)
+  
