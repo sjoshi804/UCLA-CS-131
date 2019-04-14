@@ -37,10 +37,37 @@ parseChildren = function
 | [] -> []
 | Leaf symbol::tail -> [symbol] @ parseChildren tail
 | symbol::tail -> (parse_tree_leaves symbol) @ (parseChildren tail)
+(* List helper function that applies function to first element and if it returns none then recurses on tail else returns *)
+let listHelper func = function 
+| [] -> None
+| hd::tail -> if func hd = None then listHelper func tail else func hd
 
-(* Actual make_matcher creates the actual matcher function that takes a fragment and an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*))
+(* Runs acceptor function on tail if returns none then returns none else returns Some (Lead hd remainder) *)
+let run_acceptor acceptor = function 
+| [] -> None
+| hd::tail -> if acceptor tail = None then None else Some (Leaf hd)
+
+(* Helper function to check if parse tree is complete *)
+let is_complete parse_tree = true;
+
+(* Actual make_matcher creates the actual matcher function that takes a fragment and an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*)
 let actual_make_matcher = function
-| _ -> fun fr -> (Some (Leaf ""), Some "")
+| (startSymbol, rules) -> 
+  let rec symbol_matcher remainder parse_tree acceptor = function
+  | T terminal_symbol -> 
+    if List.hd remainder = terminal_symbol then 
+      if is_complete parse_tree then run_acceptor acceptor remainder else Some (Leaf terminal_symbol)
+    else None
+  | N non_terminal_symbol -> listHelper (rules_matcher remainder parse_tree acceptor) (rules non_terminal_symbol)
+  and
+  rules_matcher remainder p_tree acceptor = function 
+  | [] -> None
+  | hd::tail -> let children = List.map (fun x -> symbol_matcher remainder p_tree acceptor x) hd::tail in if valid children then Some (children) else None  
+  in 
+  let actual_matcher fragment acceptor = 
+    let tree symbol_matcher fragment None acceptor in
+    if tree = None then None
+    else let prefix = parse_tree_leaves tree in acceptor (List.filter (fun x -> not (List.mem x prefix)) fragment)
 
 (* Returns a function with a wrapper around the actual_matcher that returns what the acceptor returns*)
 let make_matcher grammar = 
