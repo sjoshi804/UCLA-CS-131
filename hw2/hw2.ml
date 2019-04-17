@@ -37,37 +37,55 @@ parseChildren = function
 | [] -> []
 | Leaf symbol::tail -> [symbol] @ parseChildren tail
 | symbol::tail -> (parse_tree_leaves symbol) @ (parseChildren tail)
+
 (* List helper function that applies function to first element and if it returns none then recurses on tail else returns *)
-let listHelper func = function 
+let rec any_valid func = function 
 | [] -> None
-| hd::tail -> if func hd = None then listHelper func tail else func hd
+| hd::tail -> if func hd = None then any_valid func tail else func hd
 
-(* Runs acceptor function on tail if returns none then returns none else returns Some (Lead hd remainder) *)
-let run_acceptor acceptor = function 
-| [] -> None
-| hd::tail -> if acceptor tail = None then None else Some (Leaf hd)
+(* Deletes all elements that of second list that are at start of first list *)
+let rec revised_remainder fragment = function 
+| [] -> fragment
+| hd::tail -> revised_remainder (List.tl fragment) tail
 
-(* Helper function to check if parse tree is complete *)
-let is_complete parse_tree = true;
+let unwrap_tree = function 
+| None -> Leaf ""
+| Some x -> x;;
 
-(* Actual make_matcher creates the actual matcher function that takes a fragment and an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*)
+let unwrap_list = function
+| None -> []
+| Some x -> x
+
+(* Checks if all symbols within a certain rule returned Some Node/Leaf *)
+let rec all_valid remainder func = function
+| [] -> []
+| hd::tail -> let tree = func (remainder hd) in if tree = None then [tree]
+ else [tree] @ all_valid (revised_remainder (remainder (parse_tree_leaves(unwrap_tree(tree))))) func tail
+
+(* Actual make_matcher creates the actual matcher function that takes a fragment and 
+an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*)
 let actual_make_matcher = function
-| (startSymbol, rules) -> 
-  let rec symbol_matcher remainder parse_tree acceptor = function
+| (start_symbol, rules) -> 
+  let rec symbol_matcher remainder = function
   | T terminal_symbol -> 
-    if List.hd remainder = terminal_symbol then 
-      if is_complete parse_tree then run_acceptor acceptor remainder else Some (Leaf terminal_symbol)
-    else None
-  | N non_terminal_symbol -> listHelper (rules_matcher remainder parse_tree acceptor) (rules non_terminal_symbol)
+    if List.hd remainder = terminal_symbol then Some (Leaf terminal_symbol) else None
+  | N non_terminal_symbol -> Some (Node (non_terminal_symbol, unwrap_list(any_valid (rules_matcher remainder) (rules non_terminal_symbol))))
   and
-  rules_matcher remainder p_tree acceptor = function 
+  rules_matcher remainder = function
   | [] -> None
-  | hd::tail -> let children = List.map (fun x -> symbol_matcher remainder p_tree acceptor x) hd::tail in if valid children then Some (children) else None  
-  in 
-  let actual_matcher fragment acceptor = 
-    let tree symbol_matcher fragment None acceptor in
-    if tree = None then None
-    else let prefix = parse_tree_leaves tree in acceptor (List.filter (fun x -> not (List.mem x prefix)) fragment)
+  | hd::tail -> let children = all_valid remainder symbol_matcher hd::tail in if List.exists(fun x -> x = None) children then None else Some (List.map (fun x -> unwrap_tree x) (children))
+  in
+let actual_matcher fragment acceptor = 
+  let next_tree p_tree = parse_tree in 
+  let try_acceptor parse_tree = 
+    let output = acceptor (suffix_of (parse_tree)) in 
+    if output = None then 
+      let n_tree = next_tree parse_tree in 
+      if n_tree = None then None 
+      else try_acceptor n_tree
+    else Some (parse_tree, output)
+  in try_acceptor (symbol_matcher fragment start_symbol)
+in actual_matcher
 
 (* Returns a function with a wrapper around the actual_matcher that returns what the acceptor returns*)
 let make_matcher grammar = 
