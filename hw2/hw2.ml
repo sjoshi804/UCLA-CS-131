@@ -59,8 +59,8 @@ let unwrap_list = function
 (* Checks if all symbols within a certain rule returned Some Node/Leaf *)
 let rec all_valid remainder func = function
 | [] -> []
-| hd::tail -> let tree = func (remainder hd) in if tree = None then [tree]
- else [tree] @ all_valid (revised_remainder (remainder (parse_tree_leaves(unwrap_tree(tree))))) func tail
+| hd::tail -> let tree = func remainder hd in if tree = None then [tree]
+ else [tree] @ all_valid (revised_remainder remainder (parse_tree_leaves(unwrap_tree(tree)))) func tail
 
 (* Actual make_matcher creates the actual matcher function that takes a fragment and 
 an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*)
@@ -73,28 +73,47 @@ let actual_make_matcher = function
   and
   rules_matcher remainder = function
   | [] -> None
-  | hd::tail -> let children = all_valid remainder symbol_matcher hd::tail in if List.exists(fun x -> x = None) children then None else Some (List.map (fun x -> unwrap_tree x) (children))
+  | hd::tail -> let children = all_valid remainder symbol_matcher (hd::tail) in if List.exists(fun x -> x = None) children then None else Some (List.map (fun x -> unwrap_tree x) (children))
   in
 let actual_matcher fragment acceptor = 
-  let next_tree p_tree = parse_tree in 
-  let try_acceptor parse_tree = 
-    let output = acceptor (suffix_of (parse_tree)) in 
+  let rec next_tree = function 
+  | Leaf _ -> None
+  | Node (N internal_node, children) -> 
+    let children_next_tree = any_valid next_tree children
+
+  in 
+  let rec try_acceptor parse_tree = 
+    let output = acceptor (revised_remainder fragment (parse_tree_leaves (unwrap_tree parse_tree))) in 
     if output = None then 
-      let n_tree = next_tree parse_tree in 
+      let n_tree = next_tree (unwrap_tree parse_tree) in 
       if n_tree = None then None 
       else try_acceptor n_tree
     else Some (parse_tree, output)
-  in try_acceptor (symbol_matcher fragment start_symbol)
+  in 
+  let start_tree = symbol_matcher fragment start_symbol in 
+  if start_tree = None then None else try_acceptor start_tree
 in actual_matcher
+
+let unwrap_tuple = function 
+| None -> (Some (Leaf ""), Some "")
+| Some x -> x
+
+let unwrap_string = function 
+| None -> ""
+| Some x -> x
 
 (* Returns a function with a wrapper around the actual_matcher that returns what the acceptor returns*)
 let make_matcher grammar = 
-fun fragment acceptor -> snd ((actual_make_matcher grammar) fragment acceptor)
+fun fragment acceptor -> let ans = ((actual_make_matcher grammar) fragment acceptor) in 
+if ans = None then None
+else snd (unwrap_tuple ans)
 
 (* Returns a function with a wrapper around the actual_matcher that has an accept_empty acceptor and returns the parse tree instead*)
 let make_parser grammar = 
   let accept_empty = function
-  | "" -> Some ""
+  | [] -> Some ""
   | _ -> None in 
-  fun fragment -> fst ((actual_make_matcher grammar) fragment accept_empty)
+  fun fragment -> let ans = ((actual_make_matcher grammar) fragment accept_empty) in 
+  if ans = None then None
+  else fst (unwrap_tuple ans)
   
