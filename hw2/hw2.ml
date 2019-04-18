@@ -79,8 +79,18 @@ let actual_matcher fragment acceptor =
   let rec next_tree = function 
   | Leaf _ -> None
   | Node (N internal_node, children) -> 
-    let children_next_tree = any_valid next_tree children
-
+  let new_node = any_valid symbol_matcher (List.rev children)
+  in 
+  if new_node = None
+  then 
+  let new_children = try_next_rule (extract_rule children) (rules internal_node) 
+    in if new_children = None then None else Node (N internal_node, new_children)
+  else Node (N internal_node, List.map (fun x -> if (fst new_node) = (fst x) then new_node else x) children)
+  (* 
+    Try from right most child to left most recursively if there is a next_tree
+    if there is replace that that child's tree with an unwrapped version of the tree that was returned
+    if not try your own next rules recursively and if this doesn't work either return none
+  *)
   in 
   let rec try_acceptor parse_tree = 
     let output = acceptor (revised_remainder fragment (parse_tree_leaves (unwrap_tree parse_tree))) in 
