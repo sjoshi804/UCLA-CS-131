@@ -87,9 +87,9 @@ an acceptor and returns a tuple containing Some parse tree or None and Some suff
 let actual_make_matcher = function
 | (start_symbol, rules) -> 
   let rec symbol_matcher remainder = function
-  | T terminal_symbol -> 
+  | T terminal_symbol -> if remainder = [] then None else 
     if List.hd remainder = terminal_symbol then Some (Leaf (T terminal_symbol)) else None
-  | N non_terminal_symbol -> Some (Node (N non_terminal_symbol, unwrap_list (any_valid (rules_matcher remainder) (rules non_terminal_symbol)) ))
+  | N non_terminal_symbol -> let temp = (any_valid (rules_matcher remainder) (rules non_terminal_symbol)) in if temp = None then None else Some (Node (N non_terminal_symbol, unwrap_list temp))
   and
   rules_matcher remainder = function
   | [] -> None
@@ -154,3 +154,31 @@ let make_parser grammar =
   if ans = None then None
   else fst (unwrap_tuple ans)
   
+  type awksub_nonterminals =
+    | Expr | Term | Lvalue | Incrop | Binop | Num
+  
+  let awkish_grammar =
+    (Expr,
+     function
+       | Expr ->
+           [[N Term; N Binop; N Expr];
+            [N Term]]
+       | Term ->
+     [[N Num];
+      [N Lvalue];
+      [N Incrop; N Lvalue];
+      [N Lvalue; N Incrop];
+      [T"("; N Expr; T")"]]
+       | Lvalue ->
+     [[T"$"; N Expr]]
+       | Incrop ->
+     [[T"++"];
+      [T"--"]]
+       | Binop ->
+     [[T"+"];
+      [T"-"]]
+       | Num ->
+     [[T"0"]; [T"1"]; [T"2"]; [T"3"]; [T"4"];
+      [T"5"]; [T"6"]; [T"7"]; [T"8"]; [T"9"]])
+
+let awk_parser = make_parser awkish_grammar
