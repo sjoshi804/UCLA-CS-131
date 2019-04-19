@@ -41,7 +41,7 @@ parseChildren = function
 (* List helper function that applies function to first element and if it returns none then recurses on tail else returns *)
 let rec any_valid func = function 
 | [] -> None
-| hd::tail -> if func hd = None then any_valid func tail else func hd
+| hd::tail -> let ans = func hd in if ans = None then any_valid func tail else ans
 
 (* Deletes all elements that of second list that are at start of first list *)
 let rec revised_remainder fragment = function 
@@ -49,7 +49,7 @@ let rec revised_remainder fragment = function
 | hd::tail -> revised_remainder (List.tl fragment) tail
 
 let unwrap_tree = function 
-| None -> Leaf ""
+| None -> failwith "Empty"
 | Some x -> x;;
 
 let unwrap_list = function
@@ -62,34 +62,65 @@ let rec all_valid remainder func = function
 | hd::tail -> let tree = func remainder hd in if tree = None then [tree]
  else [tree] @ all_valid (revised_remainder remainder (parse_tree_leaves(unwrap_tree(tree)))) func tail
 
+let extract_symbol = function
+| Leaf a -> a
+| Node (a, _) -> a
+
+let rec extract_rule = function 
+| [] ->[]
+| hd::tail -> [extract_symbol hd] @ extract_rule tail 
+
+let rec first_new_rule current_rule = function
+| [] -> None
+| hd::tail -> if hd != current_rule then Some (hd) else first_new_rule current_rule tail 
+
+let rec try_next_rule func current_rule = function 
+| [] -> None
+| hd::tail -> 
+if hd = current_rule then 
+  let next = first_new_rule current_rule tail in 
+  if next = None then None else func (unwrap_list next)
+else try_next_rule func current_rule tail  
+
 (* Actual make_matcher creates the actual matcher function that takes a fragment and 
 an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*)
 let actual_make_matcher = function
 | (start_symbol, rules) -> 
   let rec symbol_matcher remainder = function
   | T terminal_symbol -> 
-    if List.hd remainder = terminal_symbol then Some (Leaf terminal_symbol) else None
-  | N non_terminal_symbol -> Some (Node (non_terminal_symbol, unwrap_list(any_valid (rules_matcher remainder) (rules non_terminal_symbol))))
+    if List.hd remainder = terminal_symbol then Some (Leaf (T terminal_symbol)) else None
+  | N non_terminal_symbol -> Some (Node (N non_terminal_symbol, unwrap_list (any_valid (rules_matcher remainder) (rules non_terminal_symbol)) ))
   and
   rules_matcher remainder = function
   | [] -> None
-  | hd::tail -> let children = all_valid remainder symbol_matcher (hd::tail) in if List.exists(fun x -> x = None) children then None else Some (List.map (fun x -> unwrap_tree x) (children))
+  | hd::tail -> let children = all_valid remainder symbol_matcher (hd::tail) 
+  in 
+  if List.exists(fun x -> x = None) children then None else Some (List.map (fun x -> unwrap_tree x) (children))
   in
 let actual_matcher fragment acceptor = 
   let rec next_tree = function 
   | Leaf _ -> None
+  | Node (T _, _) -> failwith "invalid node"
   | Node (N internal_node, children) -> 
-  let new_node = any_valid symbol_matcher (List.rev children)
+  let new_node = any_valid next_tree (List.rev children)
   in 
   if new_node = None
-  then 
-  let new_children = try_next_rule (extract_rule children) (rules internal_node) 
-    in if new_children = None then None else Node (N internal_node, new_children)
-  else Node (N internal_node, List.map (fun x -> if (fst new_node) = (fst x) then new_node else x) children)
+  then
+  let new_children = try_next_rule (rules_matcher fragment) (extract_rule children) (rules internal_node) 
+    in if new_children = None then None else Some (Node (N internal_node, (unwrap_list new_children)))
+  else Some (Node (N internal_node, 
+    List.map (fun x -> 
+    if (extract_symbol (unwrap_tree new_node)) = (extract_symbol x) 
+      then unwrap_tree new_node 
+    else x) children)) 
   (* 
     Try from right most child to left most recursively if there is a next_tree
     if there is replace that that child's tree with an unwrapped version of the tree that was returned
     if not try your own next rules recursively and if this doesn't work either return none
+
+    try next_rule must assume the rule and then try to parse for every one hence it should be passed the function rules_matcher actually
+    and hence needs to know remainder too
+    pass fragment to this too and before recursing everytime calculate remainder - PENDING!!!!!!!!
   *)
   in 
   let rec try_acceptor parse_tree = 
@@ -100,16 +131,12 @@ let actual_matcher fragment acceptor =
       else try_acceptor n_tree
     else Some (parse_tree, output)
   in 
-  let start_tree = symbol_matcher fragment start_symbol in 
+  let start_tree = symbol_matcher fragment (N start_symbol)  in 
   if start_tree = None then None else try_acceptor start_tree
 in actual_matcher
 
 let unwrap_tuple = function 
-| None -> (Some (Leaf ""), Some "")
-| Some x -> x
-
-let unwrap_string = function 
-| None -> ""
+| None -> failwith "Empty"
 | Some x -> x
 
 (* Returns a function with a wrapper around the actual_matcher that returns what the acceptor returns*)
@@ -121,7 +148,7 @@ else snd (unwrap_tuple ans)
 (* Returns a function with a wrapper around the actual_matcher that has an accept_empty acceptor and returns the parse tree instead*)
 let make_parser grammar = 
   let accept_empty = function
-  | [] -> Some ""
+  | [] -> Some []
   | _ -> None in 
   fun fragment -> let ans = ((actual_make_matcher grammar) fragment accept_empty) in 
   if ans = None then None
