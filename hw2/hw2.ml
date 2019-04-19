@@ -1,4 +1,4 @@
-(* Convert hw1 grammar to hw2 grammar 
+(*Convert hw1 grammar to hw2 grammar 
 A grammar in hw1 was a tuple of a non-terminal and list of tuples of (non terminals and a list of non terminals and terminals) 
 A grammar in hw 2 is a tuple of a non-terminal - the starting sumbol and a function that matches non-terminals to a list of possible symbols (symbols captured in lists) it can be used to represent
 *)
