@@ -63,8 +63,8 @@ let rec all_valid remainder func = function
  else [tree] @ all_valid (revised_remainder remainder (parse_tree_leaves(unwrap_tree(tree)))) func tail
 
 let extract_symbol = function
-| Leaf a -> a
-| Node (a, _) -> a
+| Leaf a -> T a
+| Node (a, _) -> N a
 
 let rec extract_rule = function 
 | [] ->[]
@@ -88,8 +88,9 @@ let actual_make_matcher = function
 | (start_symbol, rules) -> 
   let rec symbol_matcher remainder = function
   | T terminal_symbol -> if remainder = [] then None else 
-    if List.hd remainder = terminal_symbol then Some (Leaf (T terminal_symbol)) else None
-  | N non_terminal_symbol -> let temp = (any_valid (rules_matcher remainder) (rules non_terminal_symbol)) in if temp = None then None else Some (Node (N non_terminal_symbol, unwrap_list temp))
+    if List.hd remainder = terminal_symbol then Some (Leaf (terminal_symbol)) else None
+  | N non_terminal_symbol -> let temp = (any_valid (rules_matcher remainder) (rules non_terminal_symbol)) in 
+  if temp = None then None else Some (Node (non_terminal_symbol, (unwrap_list temp)))
   and
   rules_matcher remainder = function
   | [] -> None
@@ -98,35 +99,33 @@ let actual_make_matcher = function
   if List.exists(fun x -> x = None) children then None else Some (List.map (fun x -> unwrap_tree x) (children))
   in
 let actual_matcher fragment acceptor = 
-  let rec next_tree = function 
-  | Leaf _ -> None
-  | Node (T _, _) -> failwith "invalid node"
-  | Node (N internal_node, children) -> 
-  let new_node = any_valid next_tree (List.rev children)
-  in 
-  if new_node = None
-  then
-  let new_children = try_next_rule (rules_matcher fragment) (extract_rule children) (rules internal_node) 
-    in if new_children = None then None else Some (Node (N internal_node, (unwrap_list new_children)))
-  else Some (Node (N internal_node, 
-    List.map (fun x -> 
-    if (extract_symbol (unwrap_tree new_node)) = (extract_symbol x) 
-      then unwrap_tree new_node 
-    else x) children)) 
-  (* 
-    Try from right most child to left most recursively if there is a next_tree
-    if there is replace that that child's tree with an unwrapped version of the tree that was returned
-    if not try your own next rules recursively and if this doesn't work either return none
-
-    try next_rule must assume the rule and then try to parse for every one hence it should be passed the function rules_matcher actually
-    and hence needs to know remainder too
-    pass fragment to this too and before recursing everytime calculate remainder - PENDING!!!!!!!!
-  *)
+  let rec next_tree suffix = function 
+  | Leaf a -> (None, a::suffix)
+  | Node (internal_node, children) -> 
+  let child_output = (next_tree_from_children suffix (List.rev children)) in
+  let new_children = fst child_output in
+  let new_suffix = snd child_output in 
+  if new_children = None
+  then 
+    let new_rules_children = try_next_rule (rules_matcher fragment) (extract_rule children) (rules internal_node) in
+    if new_rules_children = None then (None, new_suffix) else (Some(Node(internal_node, unwrap_list new_rules_children)), new_suffix)
+  else (Some(Node(internal_node, List.rev (unwrap_list new_children))), new_suffix)
+  and 
+  next_tree_from_children suffix = function 
+  | [] -> (None, suffix)
+  | [hd] -> let next_tree_head = next_tree suffix hd in 
+    if fst next_tree_head = None then (None, snd next_tree_head) else (Some [unwrap_tree(fst next_tree_head)], suffix)
+  | hd::tail -> let next_tree_head = next_tree suffix hd in 
+    if fst next_tree_head = None then 
+      let rec_call = next_tree_from_children (snd next_tree_head) tail in 
+      if fst rec_call = None then (None, (snd rec_call)) else let new_tail = unwrap_list (fst rec_call) in (Some (hd::new_tail), suffix)
+    else (Some ((unwrap_tree (fst next_tree_head))::tail), suffix)
   in 
   let rec try_acceptor parse_tree = 
-    let output = acceptor (revised_remainder fragment (parse_tree_leaves (unwrap_tree parse_tree))) in 
+    let suffix = (parse_tree_leaves (unwrap_tree parse_tree)) in
+    let output = acceptor (revised_remainder fragment suffix) in 
     if output = None then 
-      let n_tree = next_tree (unwrap_tree parse_tree) in 
+      let n_tree = fst (next_tree suffix (unwrap_tree parse_tree)) in 
       if n_tree = None then None 
       else try_acceptor n_tree
     else Some (parse_tree, output)
