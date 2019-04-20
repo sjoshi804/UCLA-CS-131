@@ -79,8 +79,10 @@ let rec try_next_rule func current_rule = function
 | [a; b] -> if current_rule = a then func b else None
 | _ -> None
 
-let get2nd = function 
-| [a; b] -> b
+let rec new_rules current_rule = function 
+  | [] -> []
+  | hd::tail -> if hd = current_rule then List.filter (fun x -> x != hd)
+ tail else new_rules current_rule tail
 
 (* Actual make_matcher creates the actual matcher function that takes a fragment and 
 an acceptor and returns a tuple containing Some parse tree or None and Some suffix string or None*)
@@ -101,11 +103,9 @@ let actual_make_matcher = function
 let actual_matcher acceptor fragment = 
   let rec next_tree suffix = function 
   | Leaf a -> (None, a::suffix)
-  | Node (internal_node, children) -> let temp = (any_valid (rules_matcher suffix) (List.tl (rules internal_node))) in 
-  if temp = None then (None, suffix) else (Some (Node (internal_node, (unwrap_list temp))), suffix)(*
-  let new_children = rules_matcher suffix (get2nd (rules internal_node)) in
-   if unwrap_list new_children = children then (None, []) else *)(*
-  let new_rules_children = rules_matcher suffix [(*try_next_rule (rules_matcher suffix) (extract_rule children) (rules internal_node)*) in
+  | Node (internal_node, children) -> let temp = (any_valid (rules_matcher suffix) (new_rules (extract_rule children) (rules internal_node))) in 
+  if temp = None then (None, suffix) else (Some (Node (internal_node, (unwrap_list temp))), suffix)
+  let new_rules_children = rules_matcher suffix  in
     if new_rules_children = None then (None, suffix) else (Some(Node(internal_node, children)), suffix)*)
   (*let child_output = (next_tree_from_children suffix (List.rev children)) in
   let new_children = fst child_output in
@@ -252,6 +252,6 @@ let test7 =
     | _ -> false
 
 
-let test_grammar = [Expr, [T 0];Expr, [T 0; T 1]]
+let test_grammar = [Expr, [T 0]; Expr, [T 0; T 1]]
 let gram = convert_grammar (Expr, test_grammar)
 let p = make_parser gram
