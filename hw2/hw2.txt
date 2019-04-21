@@ -1,0 +1,31 @@
+Assessment of make_matcher vs make_parser: From an initial reading of the
+assignment, my understanding was that a parser is a special case of a matcher in
+some sense. It is a matcher curried with an acceptor that accepts only empty
+fragments. This alongside with the difference of what they return, but if the
+both were to return the parse tree generated from the input and the output of
+the acceptor - this would be the relation. Hence I wrote a function
+actual_make_matcher which creates the "actual_matcher" which is a function which
+does this - it is a matcher that creates the parse tree and returns a tuple
+containing both the parse tree and the output of the acceptor function. After
+this make_matcher and make_parser were trivial - they just returned functions
+that were wrappers for the actual_matcher created actual_make_matcher and
+returned the appropriate element of the tuple. However, this process was
+extremely complicated and I ended up running into a lot of type errors that
+helped me understand the idea of types and Constructors in ocaml much better.
+
+Assessment of weaknesses: I think it is possible to send the matcher or parser
+created by this homework into an infinite recursion by having self recursive
+rules like: "Phrase -> N Phrase" (I'm sure there are other ways to orchestrate
+this as well - this is just the simplest case). Ideally, the make_parser and
+make_matcher should account for this and delete such rules but in this
+implementation no such steps are taken.  Moreover even a grammar like the
+provided in homework 1 which is technically a context-free grammar fails with an
+infinite recursion due to the rule "Expr -> N Expr; N Binop; N Expr" as it keeps
+trying to expand the leading Expr using the same rule, in fact any grammar that
+is 'head recursive' in this manner will result in an infinite loop. This is
+definitely a weakness as this grammar is very much context-free but still cannot
+have a valid parser generated for it using the functions provided in this
+homework. However, for all thetest cases provided and any grammar that is not
+head-recursive in this fashion (the set of grammars that is not head-recursive
+within the subset of regular grammars inside the set of context-free grammars)
+the functions do produce an effective and efficent matcher and/or parser.
