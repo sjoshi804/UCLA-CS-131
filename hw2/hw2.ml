@@ -56,18 +56,6 @@ let unwrap_list = function
 | None -> []
 | Some x -> x
 
-(* Checks if all symbols within a certain rule returned Some Node/Leaf *)
-let rec all_valid remainder func = function
-| [] -> []
-| hd::tail -> let tree = func remainder hd in if tree = None then [tree]
- else 
- let prefix = (parse_tree_leaves(unwrap_tree(tree)))
- in  
- if remainder = [] 
- then []
- else
- [tree] @ all_valid (revised_remainder remainder prefix) func tail
-
 let extract_symbol = function
 | Leaf a -> T a
 | Node (a, _) -> N a
@@ -102,12 +90,9 @@ let actual_make_matcher = function
   and
   rules_matcher remainder = function
   | [] -> None
-  | hd::tail -> let children = all_valid remainder symbol_matcher (hd::tail) 
-  in 
-  if List.exists(fun x -> x = None) children then None else Some (List.map (fun x -> unwrap_tree x) (children))
-  in
-let actual_matcher acceptor fragment = 
-  let rec next_tree suffix = function 
+  | hd::tail -> all_valid remainder [] (hd::tail) 
+  and
+  next_tree suffix = function 
   | Leaf a -> (None, a::suffix)
   | Node (internal_node, children) -> 
   let new_tuple = next_children [] suffix (List.rev children) in 
@@ -143,8 +128,26 @@ let actual_matcher acceptor fragment =
     else 
     let prefixes = List.map (fun x -> parse_tree_leaves x) (unwrap_list right) in 
     let revised_suffix = revised_remainder new_suffix (List.flatten prefixes) in
-    (Some ((List.rev (unwrap_list right)) @ left), revised_suffix)
-  in 
+    (Some ((List.rev (unwrap_list right)) @ left), revised_suffix) 
+  and
+all_valid remainder checked = function
+| [] -> Some (List.rev checked)
+| hd::tail -> 
+let tree = symbol_matcher remainder hd in 
+if tree = None 
+then 
+  let parent_suffix_list = List.map (fun x -> parse_tree_leaves x) checked in
+  let parent_suffix = remainder @ (List.flatten parent_suffix_list) in
+  let new_tuple = next_children [] parent_suffix checked in
+  let new_list_of_trees = fst new_tuple in 
+  if new_list_of_trees = None then None
+  else let new_suffix = snd new_tuple in
+  all_valid new_suffix (unwrap_list new_list_of_trees) ([hd]@tail)
+else let unwrapped_tree = unwrap_tree tree in 
+all_valid (revised_remainder remainder (parse_tree_leaves unwrapped_tree)) ([(unwrapped_tree)]@checked) tail 
+
+ in
+let actual_matcher acceptor fragment = 
   let rec try_acceptor parse_tree = 
     let prefix = (parse_tree_leaves (unwrap_tree parse_tree)) in
     if fragment = [] then None else
@@ -157,7 +160,7 @@ let actual_matcher acceptor fragment =
     else  Some (parse_tree, output)
   in 
   let start_tree = symbol_matcher fragment (N start_symbol)  in 
-  if start_tree = None then None else Some (start_tree, Some []) (*try_acceptor start_tree*)
+  if start_tree = None then None else try_acceptor start_tree
 in actual_matcher
 
 let unwrap_tuple = function 
@@ -192,32 +195,30 @@ let accept_empty_suffix = function
 type awksub_nonterminals =
   | Expr | Term | Lvalue | Incrop | Binop | Num
 
-let awkish_grammar =
-  (Expr,
-   function
-     | Expr ->
-         [[N Term; N Binop; N Expr];
-          [N Term]]
-     | Term ->
-   [[N Num];
-   
-    [N Lvalue];
-    [N Lvalue; N Incrop];
-
-	  [N Incrop; N Lvalue];
-	  
-	  [T"("; N Expr; T")"]]
-     | Lvalue ->
-	 [[T"$"; N Expr]]
-     | Incrop ->
-	 [[T"++"];
-	  [T"--"]]
-     | Binop ->
-	 [[T"+"];
-	  [T"-"]]
-     | Num ->
-	 [[T"0"]; [T"1"]; [T"2"]; [T"3"]; [T"4"];
-    [T"5"]; [T"6"]; [T"7"]; [T"8"]; [T"9"]])
+  let awkish_grammar =
+    (Expr,
+     function
+       | Expr ->
+           [[N Term; N Binop; N Expr];
+            [N Term]]
+       | Term ->
+     [[N Num];
+      [N Lvalue];
+      [N Incrop; N Lvalue];
+      [N Lvalue; N Incrop];
+      [T"("; N Expr; T")"]]
+       | Lvalue ->
+     [[T"$"; N Expr]]
+       | Incrop ->
+     [[T"++"];
+      [T"--"]]
+       | Binop ->
+     [[T"+"];
+      [T"-"]]
+       | Num ->
+     [[T"0"]; [T"1"]; [T"2"]; [T"3"]; [T"4"];
+      [T"5"]; [T"6"]; [T"7"]; [T"8"]; [T"9"]])
+  
 
 let awk_parser = actual_make_matcher awkish_grammar accept_empty_suffix
 
@@ -273,9 +274,3 @@ let test7 =
   match make_parser awkish_grammar small_awk_frag with
     | Some tree -> parse_tree_leaves tree = small_awk_frag
     | _ -> false
-
-
-let test_grammar = [ Expr, [N Term];  Term, [T 1]; Expr,  [N Term; N Lvalue]; Term, [T 0]; Lvalue, [T 9; N Expr]]
-let gram = convert_grammar (Expr, test_grammar)
-let p = make_parser gram;;
-awk_parser ["$"; "1"; "++"]
