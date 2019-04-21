@@ -46,7 +46,7 @@ let rec any_valid func = function
 (* Deletes all elements that of second list that are at start of first list *)
 let rec revised_remainder fragment = function 
 | [] -> fragment
-| hd::tail -> revised_remainder (List.tl fragment) tail
+| hd::tail -> if fragment = [] then failwith "empty fragment" else revised_remainder (List.tl fragment) tail
 
 let unwrap_tree = function 
 | None -> failwith "Empty"
@@ -60,7 +60,13 @@ let unwrap_list = function
 let rec all_valid remainder func = function
 | [] -> []
 | hd::tail -> let tree = func remainder hd in if tree = None then [tree]
- else [tree] @ all_valid (revised_remainder remainder (parse_tree_leaves(unwrap_tree(tree)))) func tail
+ else 
+ let prefix = (parse_tree_leaves(unwrap_tree(tree)))
+ in  
+ if remainder = [] 
+ then []
+ else
+ [tree] @ all_valid (revised_remainder remainder prefix) func tail
 
 let extract_symbol = function
 | Leaf a -> T a
@@ -103,41 +109,55 @@ let actual_make_matcher = function
 let actual_matcher acceptor fragment = 
   let rec next_tree suffix = function 
   | Leaf a -> (None, a::suffix)
-  | Node (internal_node, children) -> let temp = (any_valid (rules_matcher suffix) (new_rules (extract_rule children) (rules internal_node))) in 
-  if temp = None then (None, suffix) else (Some (Node (internal_node, (unwrap_list temp))), suffix)
-  let new_rules_children = rules_matcher suffix  in
-    if new_rules_children = None then (None, suffix) else (Some(Node(internal_node, children)), suffix)*)
-  (*let child_output = (next_tree_from_children suffix (List.rev children)) in
-  let new_children = fst child_output in
-  let new_suffix = snd child_output in 
-  if new_children = None
+  | Node (internal_node, children) -> 
+  let new_tuple = next_children [] suffix (List.rev children) in 
+  let new_suffix = snd new_tuple in 
+  let new_children = fst new_tuple in 
+  if new_children = None 
   then 
-    let new_rules_children = try_next_rule (rules_matcher suffix) (extract_rule children) (rules internal_node) in
-    if new_rules_children = None then (None, new_suffix) else (Some(Node(internal_node, (unwrap_list new_rules_children))), new_suffix)
-  else (Some(Node(internal_node, List.rev (unwrap_list new_children))), new_suffix) *)
+    let temp = (any_valid (rules_matcher new_suffix) (new_rules (extract_rule children) (rules internal_node))) in 
+    if temp = None 
+      then (None, new_suffix)
+    else 
+      let my_tree = Node (internal_node, (unwrap_list temp)) in 
+      let prefix = (parse_tree_leaves my_tree) in 
+      let revised_suffix = revised_remainder new_suffix prefix in
+      (Some(my_tree), revised_suffix)
+  else (Some(Node(internal_node, List.rev (unwrap_list new_children))), new_suffix)
   and 
-  next_tree_from_children suffix = function 
+  next_children redo suffix = function 
   | [] -> (None, suffix)
-  | [hd] -> let next_tree_head = next_tree suffix hd in 
-    if fst next_tree_head = None then (None, snd next_tree_head) else (Some [unwrap_tree(fst next_tree_head)], suffix)
-  | hd::tail -> let next_tree_head = next_tree suffix hd in 
-    if fst next_tree_head = None then 
-      let rec_call = next_tree_from_children (snd next_tree_head) tail in 
-      if fst rec_call = None then (None, (snd rec_call)) else let new_tail = unwrap_list (fst rec_call) in (Some (hd::new_tail), suffix)
-    else (Some ((unwrap_tree (fst next_tree_head))::tail), suffix)
+  | hd::tail -> let next_tuple_hd = next_tree suffix hd in
+  let next_tree = fst next_tuple_hd in 
+  let new_suffix = snd next_tuple_hd in
+  if next_tree = None 
+    then next_children ((extract_symbol hd)::redo) new_suffix tail
+  else 
+  let left = (unwrap_tree next_tree)::tail in 
+  if redo = [] 
+    then (Some (left), new_suffix)
+ else 
+    let right = rules_matcher new_suffix redo in 
+    if right = None 
+      then next_children ((extract_symbol hd)::redo) new_suffix tail
+    else 
+    let prefixes = List.map (fun x -> parse_tree_leaves x) (unwrap_list right) in 
+    let revised_suffix = revised_remainder new_suffix (List.flatten prefixes) in
+    (Some ((List.rev (unwrap_list right)) @ left), revised_suffix)
   in 
   let rec try_acceptor parse_tree = 
     let prefix = (parse_tree_leaves (unwrap_tree parse_tree)) in
+    if fragment = [] then None else
     let suffix = (revised_remainder fragment prefix) in
     let output = acceptor suffix in 
     if output = None then 
-      let n_tree = fst (next_tree fragment (unwrap_tree parse_tree)) in 
+      let n_tree = fst (next_tree suffix (unwrap_tree parse_tree)) in 
       if n_tree = None then None 
-      else Some (n_tree, output)
-    else Some (parse_tree, output)
+      else try_acceptor n_tree
+    else  Some (parse_tree, output)
   in 
   let start_tree = symbol_matcher fragment (N start_symbol)  in 
-  if start_tree = None then None else try_acceptor start_tree
+  if start_tree = None then None else Some (start_tree, Some []) (*try_acceptor start_tree*)
 in actual_matcher
 
 let unwrap_tuple = function 
@@ -159,7 +179,7 @@ let make_parser grammar =
   if ans = None then None
   else fst (unwrap_tuple ans)
 
-  let accept_all string = Some string
+let accept_all string = Some string
 let accept_empty_suffix = function
    | _::_ -> None
    | x -> Some x
@@ -179,10 +199,13 @@ let awkish_grammar =
          [[N Term; N Binop; N Expr];
           [N Term]]
      | Term ->
-	 [[N Num];
-	  [N Lvalue];
+   [[N Num];
+   
+    [N Lvalue];
+    [N Lvalue; N Incrop];
+
 	  [N Incrop; N Lvalue];
-	  [N Lvalue; N Incrop];
+	  
 	  [T"("; N Expr; T")"]]
      | Lvalue ->
 	 [[T"$"; N Expr]]
@@ -196,7 +219,7 @@ let awkish_grammar =
 	 [[T"0"]; [T"1"]; [T"2"]; [T"3"]; [T"4"];
     [T"5"]; [T"6"]; [T"7"]; [T"8"]; [T"9"]])
 
-let awk_parser = make_parser awkish_grammar
+let awk_parser = actual_make_matcher awkish_grammar accept_empty_suffix
 
 let test0 =
   ((make_matcher awkish_grammar) accept_all ["ouch"] = None)
@@ -252,6 +275,7 @@ let test7 =
     | _ -> false
 
 
-let test_grammar = [Expr, [T 0]; Expr, [T 0; T 1]]
+let test_grammar = [ Expr, [N Term];  Term, [T 1]; Expr,  [N Term; N Lvalue]; Term, [T 0]; Lvalue, [T 9; N Expr]]
 let gram = convert_grammar (Expr, test_grammar)
-let p = make_parser gram
+let p = make_parser gram;;
+awk_parser ["$"; "1"; "++"]
