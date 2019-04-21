@@ -1,3 +1,7 @@
+let accept_empty_suffix = function
+   | _::_ -> None
+   | x -> Some x
+   
 type test_nonterminals =
   | Phrase | Noun | Verb | Subject | Adj
 
