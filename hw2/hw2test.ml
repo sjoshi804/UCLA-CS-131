@@ -21,7 +21,7 @@ let test_rules =
 
 let new_grammar = convert_grammar (Phrase, test_rules)
 let test_fragment = ["Smart"; "Cool"; "Dogs"; "bark"]
-let matcher_test = ((make_matcher new_grammar accept_empty_suffix test_fragment) =  Some [])
+let make_matcher_test = ((make_matcher new_grammar accept_empty_suffix test_fragment) =  Some [])
 let parser_fragment = ["Cool"; "Smart"; "Cute"; "Cool"; "Dogs"; "eat"]
 let parse_tree = unwrap_tree (make_parser new_grammar parser_fragment)
-let parser_test = ((parse_tree_leaves parse_tree) = parser_fragment)
+let make_parser_test = ((parse_tree_leaves parse_tree) = parser_fragment)
