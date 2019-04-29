@@ -1,10 +1,10 @@
-class UnsynchronizedState implements State {
+class Unsynchronized implements State {
     private byte[] value;
     private byte maxval;
 
-    UnsynchronizedState(byte[] v) { value = v; maxval = 127; }
+    Unsynchronized(byte[] v) { value = v; maxval = 127; }
 
-    UnsynchronizedState(byte[] v, byte m) { value = v; maxval = m; }
+    Unsynchronized(byte[] v, byte m) { value = v; maxval = m; }
 
     public int size() { return value.length; }
 
