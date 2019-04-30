@@ -1,5 +1,8 @@
-\BOOKMARK [1][-]{section.1}{Testing}{}% 1
-\BOOKMARK [1][-]{section.2}{Comparisons}{}% 2
-\BOOKMARK [1][-]{section.3}{Package Analysis}{}% 3
-\BOOKMARK [1][-]{section.4}{Challenges}{}% 4
-\BOOKMARK [1][-]{section.5}{DRF Class Analysis}{}% 5
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Empirical Testing}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Runtime v/s Number of Threads}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Runtime v/s Number of Threads}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Runtime v/s Number of Threads}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{Analysis of Packages with Support for Ensuring Sequential Consistency for the BetterSafe Class' Implementation}{}% 6
+\BOOKMARK [1][-]{section.4}{Challenges Faced}{}% 7
+\BOOKMARK [1][-]{section.5}{DRF Class Analysis}{}% 8
