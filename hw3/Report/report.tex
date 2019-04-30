@@ -128,7 +128,7 @@ In general, in keeping with the field's fixation with worst-case analysis, compu
 \begin{tabular}{llclc}
 \toprule
 \midrule
-Model && Time per Transition && DRF \\
+Class && Time per Transition && DRF \\
 \cmidrule{2-4}
 & 8 Threads & 16 Threads & 32 Threads & \\
 \midrule
@@ -149,7 +149,7 @@ BetterSafe & 0 ns & 0 ns & 0 ns & Yes \\
 \begin{tabular}{llclc}
 \toprule
 \midrule
-Model && Time per Transition && DRF \\
+Class && Time per Transition && DRF \\
 \cmidrule{2-4}
 & 100 Elements & 500 Elements & 1000 Elements & \\
 \midrule
@@ -170,9 +170,9 @@ BetterSafe & 0 ns & 0 ns & 0 ns & Yes \\
 \begin{tabular}{llclc}
 \toprule
 \midrule
-Model && Time per Transition && DRF \\
+Class && Time per Transition && DRF \\
 \cmidrule{2-4}
-& 8 Threads & 16 Threads & 32 Threads & \\
+& 100k swaps & 500k swaps & 1m swaps & \\
 \midrule
 \midrule
 Null & 0 ns & 0 ns & 0 ns & Yes \\
@@ -196,28 +196,45 @@ While this functionality would undoubtedly be invaluable to any production level
 \begin{verbatim}
 java.util.concurrent.atomic
 \end{verbatim}
-atomics
-
-\begin{verbatim}
-java.util.concurrent.locks
-\end{verbatim}
-
+This package as the name suggests provides the programmer with classes implementing basic data structures with atomic accessor and mutator methods. The package contains classes like AtomicBoolean, AtomicInteger and AtomicIntegerArray - the class that is used by the 'partially' synchronous GetNSet class. The reason behind this class being an infeasible solution to ensuring sequential consistency in the program as desired is also why GetNSet is unable to guarantee the desired correctness. In particular, since the class handles all locking for the programmer, it is impossible to actually control the lock and ensure mutually exclusive access for the period of both reading and writing as is required in the simulation (since without this it is possible that the elements being swapped do not violate the check conditions at the time of checking but do so before the write lock is obtained thus leading to incorrect execution). 
+Hence this package too doesn't provide us with a potential solution to the issue of efficient synchronization in the simulation. 
 
 \begin{verbatim}
 java.lang.invoke.VarHandle
 \end{verbatim}
+The class VarHandle within the package java.lang.invoke is a dynamically strongly typed referebce to a variable or to a parametricallly-defined family of variables that provides various modes of access such as: regular read/write, volatile read/write (where the program is forced to actually load and store rather than simply use values kept in registers), and compare-and-swap. In some sense the functionality it provides in the context of the simulation is very similar to that provided by the classes in the atomic package and as such it fails due to the same reason, there doesn't seem to be any reasonable way of implementing the locking around both read and write using this class. 
 
+\begin{verbatim}
+java.util.concurrent.locks
+\end{verbatim}
+By elimination, it is now obvious that this class must be the one ideal for the implementation of BetterSafe. This is due to the fact that the locks provided by this class allow the programmer the freedom to control the mutual exclusion at much finer granularity and thus ensure that the lock ensures mutual exclusion in the region involving both the read and write, but nothing more. 
+There are various types of locks provided in this package, but after understanding the need of the simulation it is obvious that any benefit that the read-write locks could offer would run into the same issue as the data strucutres provided by the atomic package. Thus, as a result, the lock chosen for the BetterSafe class was the Reentrant Lock that allows the programmer to obtain the lock before carrying out the necessary reads to check if values in the array are valid and the necessary writes to actually swap the values in the desired manner. 
+Moreover, the fine granularity that this lock allows the programmer to operate on, allows for performance gains as evinced by the data presented earlier in this report. 
 
 %-------------------------------------------------------------------------------
-\section{Challenges Faced}
+\section{Challenges Faced During Performance Testing}
 %-------------------------------------------------------------------------------
-
+The main challenge was generating the data to carry out the tests. It is practically impossible to do this manually hence a script was written to test the programs in the desired manner. This greatly simplified the task of rigorous performance testing and allowed for easy testing with large arrays of random elements alongside differeing number of threads and swaps. 
 
 %-------------------------------------------------------------------------------
-\section{DRF Class Analysis}
+\section{Class Analysis}
 %-------------------------------------------------------------------------------
+\subsection{Best Class for GDI}
+The best class for GDI would be BetterSafe due to both its superior performance and the fact that is data race free thus doesn't exhibit any unpredictable and/or incorrect behavior. This would not only guarantee the speed desired by customers but also the benefits of absolute correctness as it is Data Race Free. 
 
+\subsection{BetterSafe v/s Synchronized}
+The BetterSafe class performs better than the Synchronized class despite both providing essentially the exact same synchronization due to the finer granularity that the BetterSafe class is able to operate on. The \emph{synchronized} keyword locks the entire object when a thread calls the swap method preventing any other thread from interleaving any operation on this class, whereas the finer grained lock ensures this mutual exclusion only in the critical section where the actual reads and writes happen (thus allowing for greater interleaving of operations, thus greater parallelism and resultantly greater performance). 
 
+\subsection{Data Race Freeness of Classes}
+The Null Class is DRF trivially as it doesn't actually carry out any operations on the data and hence can never have any data race conditions. 
+
+The Synchronized class is obviously DRF due to the use of the word synchronized that ensures that while a thread is executing the method swap no other thread can access or mutate the entire object. 
+
+The BetterSafe class again is obviously DRF as it ensures mutual exclusison in the critical section of reads and writes, thus prevents violation of sequential consistency. 
+
+The Unsynchronized class is evidently DRF as there is no synchronization method used here and thus threads can interleave their operations arbitrarily allowing the check conditions of ith entry being greater than 0 and jth entry being less than maxval to be violated between a thread's checking and actual execution of the 'swapping'. 
+
+The GetNSet class is perhaps most interestingly not DRF as while it does use the atomic data structure AtomicIntegerArray, it is still possible for threads to interleave their write operations in between the read and write of another thread (as while the actual reading and writing is atomic there is no way to guarantee sequential consistency across both actions). 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
