@@ -12,17 +12,17 @@ class UnsafeMemory {
 	    byte[] stateArg = value.clone();
 	    State s;
 	    if (args[0].equals("Null"))
-		s = new NullState(stateArg, maxval);
+			s = new NullState(stateArg, maxval);
 	    else if (args[0].equals("Synchronized"))
-		s = new SynchronizedState(stateArg, maxval);
+			s = new SynchronizedState(stateArg, maxval);
 		else if (args[0].equals("BetterSafe"))
-		s = new BetterSafe(stateArg, maxval);
+			s = new BetterSafe(stateArg, maxval);
 		else if (args[0].equals("Unsynchronized"))
-		s = new Unsynchronized(stateArg, maxval);
+			s = new Unsynchronized(stateArg, maxval);
 		else if (args[0].equals("GetNSet"))
-		s = new GetNSet(stateArg, maxval);
+			s = new GetNSet(stateArg, maxval);
 		else
-		throw new Exception(args[0]);
+			throw new Exception(args[0]);
 	    dowork(nThreads, nTransitions, s);
 	    test(value, s.current(), maxval);
 	    System.exit (0);
