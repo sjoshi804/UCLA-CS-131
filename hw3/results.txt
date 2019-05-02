@@ -1,0 +1,366 @@
+java UnsafeMemory Null threads=8 swaps=100000 maxval=127 array=medium
+Threads average 1427.91 ns/transition
+
+
+java UnsafeMemory Null threads=16 swaps=100000 maxval=127 array=medium
+Threads average 4941.32 ns/transition
+
+
+java UnsafeMemory Null threads=32 swaps=100000 maxval=127 array=medium
+Threads average 6444.14 ns/transition
+
+
+java UnsafeMemory Null threads=8 swaps=100000 maxval=127 array=medium
+Threads average 1336.89 ns/transition
+
+
+java UnsafeMemory Null threads=8 swaps=500000 maxval=127 array=medium
+Threads average 3175.12 ns/transition
+
+
+java UnsafeMemory Null threads=8 swaps=1000000 maxval=127 array=medium
+Threads average 1902.53 ns/transition
+
+
+java UnsafeMemory Null threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2366.44 ns/transition
+
+
+java UnsafeMemory Null threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 1837.88 ns/transition
+
+
+java UnsafeMemory Null threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2796.80 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=8 swaps=100000 maxval=127 array=medium
+Threads average 1909.20 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=16 swaps=100000 maxval=127 array=medium
+Threads average 4740.51 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=32 swaps=100000 maxval=127 array=medium
+Threads average 9927.85 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=8 swaps=100000 maxval=127 array=medium
+Threads average 1768.79 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=8 swaps=500000 maxval=127 array=medium
+Threads average 1193.66 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=8 swaps=1000000 maxval=127 array=medium
+Threads average 632.983 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 1962.02 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 1870.51 ns/transition
+
+
+java UnsafeMemory BetterSafe threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 1920.29 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 array=medium
+Threads average 3246.38 ns/transition
+
+
+java UnsafeMemory Synchronized threads=16 swaps=100000 maxval=127 array=medium
+Threads average 11227.6 ns/transition
+
+
+java UnsafeMemory Synchronized threads=32 swaps=100000 maxval=127 array=medium
+Threads average 16469.9 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 array=medium
+Threads average 2533.99 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=500000 maxval=127 array=medium
+Threads average 1555.69 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=1000000 maxval=127 array=medium
+Threads average 1151.00 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2725.76 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2564.71 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2557.62 ns/transition
+
+
+java UnsafeMemory GetNSet threads=8 swaps=100000 maxval=127 array=medium
+Threads average 3486.36 ns/transition
+
+
+java UnsafeMemory GetNSet threads=16 swaps=100000 maxval=127 array=medium
+Threads average 7051.64 ns/transition
+
+
+java UnsafeMemory GetNSet threads=32 swaps=100000 maxval=127 array=medium
+Threads average 16725.3 ns/transition
+
+
+java UnsafeMemory GetNSet threads=8 swaps=100000 maxval=127 array=medium
+Threads average 3255.91 ns/transition
+
+
+java UnsafeMemory GetNSet threads=8 swaps=500000 maxval=127 array=medium
+Threads average 2446.55 ns/transition
+
+
+java UnsafeMemory GetNSet threads=8 swaps=1000000 maxval=127 array=medium
+Threads average 1059.50 ns/transition
+
+
+java UnsafeMemory GetNSet threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2835.37 ns/transition
+
+
+java UnsafeMemory GetNSet threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2835.42 ns/transition
+
+
+java UnsafeMemory GetNSet threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 3119.25 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 array=medium
+Threads average 3649.77 ns/transition
+
+
+java UnsafeMemory Synchronized threads=16 swaps=100000 maxval=127 array=medium
+Threads average 6808.03 ns/transition
+
+
+java UnsafeMemory Synchronized threads=32 swaps=100000 maxval=127 array=medium
+Threads average 14544.9 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 array=medium
+Threads average 3099.54 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=500000 maxval=127 array=medium
+Threads average 1366.18 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=1000000 maxval=127 array=medium
+Threads average 1081.17 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 9044.89 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 3897.29 ns/transition
+
+
+java UnsafeMemory Synchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2663.65 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=8 swaps=100000 maxval=127 array=medium
+Threads average 5929.34 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=16 swaps=100000 maxval=127 array=medium
+Threads average 4100.34 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=32 swaps=100000 maxval=127 array=medium
+Threads average 13052.6 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=8 swaps=100000 maxval=127 array=medium
+Threads average 1967.06 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=8 swaps=500000 maxval=127 array=medium
+Threads average 2112.45 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=8 swaps=1000000 maxval=127 array=medium
+Threads average 1710.96 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 5387.61 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 2798.61 ns/transition
+
+
+java UnsafeMemory Unsynchronized threads=8 swaps=100000 maxval=127 trying different sizes
+Threads average 3217.17 ns/transition
+
+
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4116 CPU @ 2.10GHz
+stepping	: 4
+microcode	: 0xffffffff
+cpu MHz		: 2095.079
+cache size	: 16896 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 21
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology eagerfpu pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ibrs ibpb stibp fsgsbase bmi1 hle avx2 smep bmi2 erms invpcid rtm mpx avx512f avx512dq rdseed adx smap clflushopt avx512cd avx512bw avx512vl xsaveopt xsavec spec_ctrl intel_stibp
+bogomips	: 4190.15
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 44 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4116 CPU @ 2.10GHz
+stepping	: 4
+microcode	: 0xffffffff
+cpu MHz		: 2095.079
+cache size	: 16896 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 4
+apicid		: 1
+initial apicid	: 1
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 21
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology eagerfpu pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ibrs ibpb stibp fsgsbase bmi1 hle avx2 smep bmi2 erms invpcid rtm mpx avx512f avx512dq rdseed adx smap clflushopt avx512cd avx512bw avx512vl xsaveopt xsavec spec_ctrl intel_stibp
+bogomips	: 4190.15
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 44 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4116 CPU @ 2.10GHz
+stepping	: 4
+microcode	: 0xffffffff
+cpu MHz		: 2095.079
+cache size	: 16896 KB
+physical id	: 0
+siblings	: 4
+core id		: 2
+cpu cores	: 4
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 21
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology eagerfpu pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ibrs ibpb stibp fsgsbase bmi1 hle avx2 smep bmi2 erms invpcid rtm mpx avx512f avx512dq rdseed adx smap clflushopt avx512cd avx512bw avx512vl xsaveopt xsavec spec_ctrl intel_stibp
+bogomips	: 4190.15
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 44 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Silver 4116 CPU @ 2.10GHz
+stepping	: 4
+microcode	: 0xffffffff
+cpu MHz		: 2095.079
+cache size	: 16896 KB
+physical id	: 0
+siblings	: 4
+core id		: 3
+cpu cores	: 4
+apicid		: 3
+initial apicid	: 3
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 21
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology eagerfpu pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ibrs ibpb stibp fsgsbase bmi1 hle avx2 smep bmi2 erms invpcid rtm mpx avx512f avx512dq rdseed adx smap clflushopt avx512cd avx512bw avx512vl xsaveopt xsavec spec_ctrl intel_stibp
+bogomips	: 4190.15
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 44 bits physical, 48 bits virtual
+power management:
+
+MemTotal:       65799788 kB
+MemFree:         1422220 kB
+MemAvailable:   14113900 kB
+Buffers:          442668 kB
+Cached:         11112816 kB
+SwapCached:            0 kB
+Active:          8763944 kB
+Inactive:        2892220 kB
+Active(anon):     203260 kB
+Inactive(anon):    70540 kB
+Active(file):    8560684 kB
+Inactive(file):  2821680 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:      20479996 kB
+SwapFree:       20479996 kB
+Dirty:                 0 kB
+Writeback:            16 kB
+AnonPages:        100660 kB
+Mapped:            82228 kB
+Shmem:            173140 kB
+Slab:            1943760 kB
+SReclaimable:    1837572 kB
+SUnreclaim:       106188 kB
+KernelStack:        3696 kB
+PageTables:         9252 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    53379888 kB
+Committed_AS:     615164 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      174884 kB
+VmallocChunk:   34359560036 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:      6144 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:      188352 kB
+DirectMap2M:     5054464 kB
+DirectMap1G:    61865984 kB

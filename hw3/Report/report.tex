@@ -121,6 +121,20 @@ In general, in keeping with the field's fixation with worst-case analysis, compu
 \section{Empirical Testing}
 %-------------------------------------------------------------------------------
 
+\subsection{Testing Environment}
+The UCLA CS Deparment's linux servers were used to run the tests in order to obtain the data. The tests were ran both on \emph{lnxsrv06} and \emph{lnxsrv10}, but for simplicity and brevity only the data from running on \emph{lnxsrv10} has been included as the trend depicted on the two servers was virtually indistinguishable.
+
+
+\noindent In particular, the technical specifications of \emph{lnxsrv10} is as following:
+\begin{description}
+  \item[Number of Processors:] 4
+  \item[Processor Model] Intel(R) Xeon(R) Silver 4116 CPU @ 2.10GHz
+  \item[Cache Size / Processor] 16896 KB
+  \item[Core / Processor] 4
+  \item[Total Memory] 65799788 kB
+  \item[Free Memory] 1422220 kB
+\end{description}
+
 \subsection{Runtime v/s Number of Threads}
 \begin{table}[!htbp]
 \centering
@@ -133,37 +147,18 @@ Class && Time per Transition && DRF \\
 & 8 Threads & 16 Threads & 32 Threads & \\
 \midrule
 \midrule
-Null & 0 ns & 0 ns & 0 ns & Yes \\
-Synchronized & 0 ns & 0 ns & 0 ns & Yes \\
-Unsynchronized & 0 ns & 0 ns & 0 ns & No \\
-GetNSet & 0 ns & 0 ns & 0 ns & No \\
-BetterSafe & 0 ns & 0 ns & 0 ns & Yes \\
+Null & 1427.91 ns & 4941.32 ns & 6444.41 ns & Yes \\
+Synchronized & 3246.38 ns & 11227.60 ns & 16469.60 ns & Yes \\
+Unsynchronized & 5929.34 ns & 4100.34 ns & 13052.60 ns & No \\
+GetNSet & 3486.36 ns & 7051.64 ns & 16725.30 ns & No \\
+BetterSafe & 1909.20 ns & 4740.51 ns & 9927.85 ns & Yes \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\subsection{Runtime v/s Number of Threads}
-\begin{table}[!htbp]
-\centering
-\scalebox{0.7}{
-\begin{tabular}{llclc}
-\toprule
-\midrule
-Class && Time per Transition && DRF \\
-\cmidrule{2-4}
-& 100 Elements & 500 Elements & 1000 Elements & \\
-\midrule
-\midrule
-Null & 0 ns & 0 ns & 0 ns & Yes \\
-Synchronized & 0 ns & 0 ns & 0 ns & Yes \\
-Unsynchronized & 0 ns & 0 ns & 0 ns & No \\
-GetNSet & 0 ns & 0 ns & 0 ns & No \\
-BetterSafe & 0 ns & 0 ns & 0 ns & Yes \\
-\bottomrule
-\end{tabular}}
-\end{table}
+The data here shows an increase in time per transition as the number of threads increases and thus indicating that performance suffers as the number of threads increases. This seems contrary to the expected results of multi-threading that is essentially always used as a means of improving performance. However, this particular example doesn't offer many avenues for actual parallelism and hence the overhead of thread creation along with the performance penalty of either contention between threads (for synchronized classes) or of context switches between threads (for the unsynchronized classes) seem to kill any performance benefit. Therefore in practice this application would not be an application well suited for multi-threading. 
 
-\subsection{Runtime v/s Number of Threads}
+\subsection{Runtime v/s Number of Swaps}
 \begin{table}[!htbp]
 \centering
 \scalebox{0.7}{
@@ -175,14 +170,43 @@ Class && Time per Transition && DRF \\
 & 100k swaps & 500k swaps & 1m swaps & \\
 \midrule
 \midrule
-Null & 0 ns & 0 ns & 0 ns & Yes \\
-Synchronized & 0 ns & 0 ns & 0 ns & Yes \\
-Unsynchronized & 0 ns & 0 ns & 0 ns & No \\
-GetNSet & 0 ns & 0 ns & 0 ns & No \\
-BetterSafe & 0 ns & 0 ns & 0 ns & Yes \\
+Null & 1336.89 ns & 3175.12 ns & 1902.53 ns & Yes \\
+Synchronized & 2533.99 ns & 1555.69 ns & 1151.00 ns & Yes \\
+Unsynchronized & 1967.06 ns & 2112.45 ns & 1710.96 ns & No \\
+GetNSet & 3255.91 ns & 2446.55 ns & 1059.50 ns & No \\
+BetterSafe & 1768.79 ns & 1193.66 ns & 632.98 ns & Yes \\
 \bottomrule
 \end{tabular}}
 \end{table}
+
+The data here shows a clear decrease in time per transition and hence increase in performance as the number of swaps increases. This would most probably due to the amortization of the fixed performance penalties of the program that are now split across a larger number of swaps. It is also interesting to note that the performance exhibited by Null seems to dsiagree with the general trend and also contradict our notions regarding its performance (since no work is really done here). This particular data can be considered an anomaly and could have been due to a variety of reasons since the server used is shared across many users.
+
+\subsection{Runtime v/s Number of Elements}
+\begin{table}[!htbp]
+\centering
+\scalebox{0.7}{
+\begin{tabular}{llclc}
+\toprule
+\midrule
+Class && Time per Transition && DRF \\
+\cmidrule{2-4}
+& 100 Elements & 500 Elements & 1000 Elements & \\
+\midrule
+\midrule
+Null & 2366.44 ns & 1837.88 ns & 2796.80 ns & Yes \\
+Synchronized & 2725.76 ns & 2564.71 ns & 2557.62 ns & Yes \\
+Unsynchronized & 5387.61 ns & 2798.61 ns & 3217.17 ns & No \\
+GetNSet & 2835.37 ns & 2835.42 ns & 3119.25 ns & No \\
+BetterSafe & 1962.29 ns & 1870.51 ns & 1920.29 ns & Yes \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+This data arguably captures the most interesting trend with their being an improvement in performance moving from 100 to 500 elements but a decrease in moving from 500 to 1000. This is likely due to the specifications of the machine that seems to not be able exploit as much spatial locality (perhaps due to cache size) when the size of the array gets extremely large, but does see a performance gain initially due to the amortization of fixed performance costs.
+
+\subsection{Summary of Peformance of Classes}
+From the data it is exceedingly easy to already see that simply from a performance standpoint BetterSafe is superior to the other classes and also guarantees DRF, therefore is probably the best for GDI's application but this is explored more in detail in a section 5.1. 
+
 %-------------------------------------------------------------------------------
 \section{Analysis of Packages with Support for Ensuring Sequential Consistency for the BetterSafe Class' Implementation}
 %-------------------------------------------------------------------------------

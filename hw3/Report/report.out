@@ -1,11 +1,13 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{Empirical Testing}{}% 2
-\BOOKMARK [2][-]{subsection.2.1}{Runtime v/s Number of Threads}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Testing Environment}{section.2}% 3
 \BOOKMARK [2][-]{subsection.2.2}{Runtime v/s Number of Threads}{section.2}% 4
-\BOOKMARK [2][-]{subsection.2.3}{Runtime v/s Number of Threads}{section.2}% 5
-\BOOKMARK [1][-]{section.3}{Analysis of Packages with Support for Ensuring Sequential Consistency for the BetterSafe Class' Implementation}{}% 6
-\BOOKMARK [1][-]{section.4}{Challenges Faced During Performance Testing}{}% 7
-\BOOKMARK [1][-]{section.5}{Class Analysis}{}% 8
-\BOOKMARK [2][-]{subsection.5.1}{Best Class for GDI}{section.5}% 9
-\BOOKMARK [2][-]{subsection.5.2}{BetterSafe v/s Synchronized}{section.5}% 10
-\BOOKMARK [2][-]{subsection.5.3}{Data Race Freeness of Classes}{section.5}% 11
+\BOOKMARK [2][-]{subsection.2.3}{Runtime v/s Number of Swaps}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{Runtime v/s Number of Elements}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.5}{Summary of Peformance of Classes}{section.2}% 7
+\BOOKMARK [1][-]{section.3}{Analysis of Packages with Support for Ensuring Sequential Consistency for the BetterSafe Class' Implementation}{}% 8
+\BOOKMARK [1][-]{section.4}{Challenges Faced During Performance Testing}{}% 9
+\BOOKMARK [1][-]{section.5}{Class Analysis}{}% 10
+\BOOKMARK [2][-]{subsection.5.1}{Best Class for GDI}{section.5}% 11
+\BOOKMARK [2][-]{subsection.5.2}{BetterSafe v/s Synchronized}{section.5}% 12
+\BOOKMARK [2][-]{subsection.5.3}{Data Race Freeness of Classes}{section.5}% 13
