@@ -112,7 +112,7 @@ ambiguous( N, C, T1, T2):-
     N >= 3,
     plain_tower(N, T1, C),
     plain_tower(N, T2, C),
-    \+ (T1 = T2).   
+    \+ (T1 = T2), !.   
 
 %Solving tower - with fd solver
 %Plain tower - solves without finite domain solver
