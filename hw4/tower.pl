@@ -71,14 +71,17 @@ plain_tower( N, T, C):-
 all_unique([]).
 all_unique([Hd | Tl]):-
     \+ (member(Hd, Tl)), 
-    unique(Tl).
+    all_unique(Tl).
 
 valid_board( N, Accumulator, []):-
     length(Accumulator, N).
 
 valid_board( N, Accumulator, [Row | Rest_Of_Rows]):-
+    length(Accumulator, N_minus_Rest),
+    N_minus_Rest < N,
     perm(N, Row),
     transpose([Row | Accumulator], M_T),
+    maplist(all_unique, M_T),
     valid_board(N, [Row | Accumulator], Rest_Of_Rows).
 
 
