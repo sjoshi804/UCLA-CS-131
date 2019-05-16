@@ -1,5 +1,5 @@
 % Defining the valid syntax for the counts data structure - depicting the visible counts for the edges
-counts([], [], [], []).
+counts( [], [], [], []).
 counts([_ | Top], [_ | Bottom], [_ | Left], [_ | Right]):- 
     counts(Top, Bottom, Left, Right). 
 
@@ -51,12 +51,14 @@ visibility( Board, Counts):-
     maplist(count_visible(0), Board, Counts).
 
 %Plain tower - solves without finite domain solver
-plain_tower(0, [], counts([], [], [], [])).
-plain_tower(N, T, C):-
-    number(N),
-    valid_counts(N, C),
+plain_tower( 0, [], counts([], [], [], [])).
+plain_tower( N, T, C):-
+    C = counts(Top, Bottom, Left, Right),
+    Board = T,
+    length(Top, N),
+    %valid_counts(N, C),
     length(Board, N),
-    maplist(perm(N), Board),
+    maplist(perm(N), Board), %fd_domain and fd_all_different fd_labelling
     visibility(Board, Left),
     maplist(reverse, Board, Board_R),
     visibility(Board_R, Right),
@@ -64,6 +66,17 @@ plain_tower(N, T, C):-
     visibility(Board_T, Top),
     maplist(reverse, Board_T, Board_T_R),
     visibility(Board_T_R, Bottom),
-    transpose(Board, Board_T),
     maplist(perm(N), Board_T).
+
+unique([]).
+unique([Hd | Tl]):-
+    member(Tl, )
+valid_board( N, Accumulator, []):-
+    length(Accumulator, N).
+
+valid_board( N, Accumulator, [Row | Rest_Of_Rows]):-
+    perm(N, Row),
+    transpose([Row | Accumulator], M_T),
+    valid_board(N, [Row | Accumulator], Rest_Of_Rows).
+
 
