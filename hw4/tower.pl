@@ -105,7 +105,7 @@ ambiguous( N, C, T1, T2):-
     C = counts(_, [3| _], _, _),
     plain_tower(N, T1, C),
     plain_tower(N, T2, C),
-    \+ (T1 = T2).     
+    \+ (T1 = T2), !.     
 
 %Brute force search all possible answers for correctness
 ambiguous( N, C, T1, T2):-
@@ -113,3 +113,21 @@ ambiguous( N, C, T1, T2):-
     plain_tower(N, T1, C),
     plain_tower(N, T2, C),
     \+ (T1 = T2).   
+
+%Solving tower - with fd solver
+%Plain tower - solves without finite domain solver
+tower( 0, [[]], counts([], [], [], [])).
+tower( N, T, C):-
+    N #> 0,
+    C #= counts(Top, Bottom, Left, Right),
+    Board #= T,
+    length(T, Len),
+    Len #= N,
+    %maplist(fd_domain())
+    %restrict all rows to permutations
+    %restrict transpose to be a tranpose
+    %restrict all cols i.e rows of transpose to permutations
+    %restrict rows L 2 R to be Left visible ... same for all
+    fd_labeling(N),
+    fd_labeling(T),
+    fd_labeling(C).
