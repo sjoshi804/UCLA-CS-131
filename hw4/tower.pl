@@ -117,17 +117,17 @@ ambiguous( N, C, T1, T2):-
 %Solving tower - with fd solver
 %Plain tower - solves without finite domain solver
 tower( 0, [[]], counts([], [], [], [])).
-tower( N, T, C):-
-    N #> 0,
-    C #= counts(Top, Bottom, Left, Right),
-    Board #= T,
-    length(T, Len),
-    Len #= N,
-    %maplist(fd_domain())
-    %restrict all rows to permutations
-    %restrict transpose to be a tranpose
-    %restrict all cols i.e rows of transpose to permutations
-    %restrict rows L 2 R to be Left visible ... same for all
-    fd_labeling(N),
-    fd_labeling(T),
-    fd_labeling(C).
+tower( N, Board, C):-
+    N > 0,
+    C = counts(Top, Bottom, Left, Right),
+    fd_valid_counts(N, C),
+    maplist(fd_all_d)
+    transpose(Board, Board_T),
+    fd_visibility(Board_T, Top),
+    reverse(Board_T, Board_T_R),
+    fd_visibility(Board_T_R, Bottom),
+    fd_labeling(C),
+    fd_labeling(Board).
+
+fd_valid_counts( N):-
+    maplist((#>))
