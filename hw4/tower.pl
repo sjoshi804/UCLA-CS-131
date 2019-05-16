@@ -51,8 +51,9 @@ visibility( Board, Counts):-
     maplist(count_visible(0), Board, Counts).
 
 %Plain tower - solves without finite domain solver
-plain_tower( 0, [], counts([], [], [], [])).
+plain_tower( 0, [[]], counts([], [], [], [])).
 plain_tower( N, T, C):-
+    N > 0,
     C = counts(Top, Bottom, Left, Right),
     Board = T,
     length(Top, N),
@@ -84,6 +85,7 @@ valid_board( N, Accumulator, [Row | Rest_Of_Rows], [Left_hd | Left_tl], [Right_h
     valid_board(N, [Row | Accumulator], Rest_Of_Rows, Left_tl, Right_tl).
 
 ambiguous( N, C, T1, T2):-
-    plain_tower(N, C, T1),
-    plain_tower(N, C, T2),
-    \+ (T1, T2).
+    C = counts(_, [N| _], _, _),
+    plain_tower(N, T1, C),
+    plain_tower(N, T2, C),
+    \+ (T1 = T2).     
