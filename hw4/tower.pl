@@ -68,9 +68,11 @@ plain_tower( N, T, C):-
     visibility(Board_T_R, Bottom),
     maplist(perm(N), Board_T).
 
-unique([]).
-unique([Hd | Tl]):-
-    member(Tl, )
+all_unique([]).
+all_unique([Hd | Tl]):-
+    \+ (member(Hd, Tl)), 
+    unique(Tl).
+
 valid_board( N, Accumulator, []):-
     length(Accumulator, N).
 
