@@ -85,7 +85,20 @@ valid_board( N, Accumulator, [Row | Rest_Of_Rows], [Left_hd | Left_tl], [Right_h
     valid_board(N, [Row | Accumulator], Rest_Of_Rows, Left_tl, Right_tl).
 
 ambiguous( N, C, T1, T2):-
-    C = counts(_, [N| _], _, _),
+    N < 3,
+    plain_tower(N, T1, C),
+    plain_tower(N, T2, C),
+    \+ (T1 = T2). 
+
+ambiguous( N, C, T1, T2):-
+    N >= 3,
+    C = counts(_, [3| _], _, _),
     plain_tower(N, T1, C),
     plain_tower(N, T2, C),
     \+ (T1 = T2).     
+
+ambiguous( N, C, T1, T2):-
+    N >= 3,
+    plain_tower(N, T1, C),
+    plain_tower(N, T2, C),
+    \+ (T1 = T2).   
