@@ -56,32 +56,31 @@ plain_tower( N, T, C):-
     C = counts(Top, Bottom, Left, Right),
     Board = T,
     length(Top, N),
-    %valid_counts(N, C),
     length(Board, N),
-    maplist(perm(N), Board), %fd_domain and fd_all_different fd_labelling
-    visibility(Board, Left),
-    maplist(reverse, Board, Board_R),
-    visibility(Board_R, Right),
+    valid_board(N, [], Board, Left, Right),
     transpose(Board, Board_T),
     visibility(Board_T, Top),
     maplist(reverse, Board_T, Board_T_R),
-    visibility(Board_T_R, Bottom),
-    maplist(perm(N), Board_T).
+    visibility(Board_T_R, Bottom).
+
 
 all_unique([]).
 all_unique([Hd | Tl]):-
     \+ (member(Hd, Tl)), 
     all_unique(Tl).
 
-valid_board( N, Accumulator, []):-
+valid_board( N, Accumulator, [], [], []):-
     length(Accumulator, N).
 
-valid_board( N, Accumulator, [Row | Rest_Of_Rows]):-
+valid_board( N, Accumulator, [Row | Rest_Of_Rows], [Left_hd | Left_tl], [Right_hd | Right_tl]):-
     length(Accumulator, N_minus_Rest),
     N_minus_Rest < N,
     perm(N, Row),
+    count_visible(0, Row, Left_hd), 
+    reverse(Row, Reverse_Row),
+    count_visible(0, Reverse_Row, Right_hd),
     transpose([Row | Accumulator], M_T),
     maplist(all_unique, M_T),
-    valid_board(N, [Row | Accumulator], Rest_Of_Rows).
+    valid_board(N, [Row | Accumulator], Rest_Of_Rows, Left_tl, Right_tl).
 
 
