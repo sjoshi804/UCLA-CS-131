@@ -42,7 +42,6 @@ transpose(Board, [Col | Rest_Of_Cols]):-
     maplist(tl, Board, Rest_Of_Rows),
     transpose(Rest_Of_Rows, Rest_Of_Cols).
     
-%Check if a board is valid, by checking if rows and cols are valid
 valid_board(N, Board):-
     length(Board, N),
     length_r(Board, N),
@@ -50,49 +49,41 @@ valid_board(N, Board):-
     transpose(Board, Board_T),
     valid_rows(N, Board_T).
 
-
-%Check if numbers for edge counts are within range
-valid_edge( N, Edge):-
-    length(Edge, N),
-    max_list(Edge, Max),
-    min_list(Edge, Min),
-    Max =< N,
-    Min >= 1.
+numbers_in_range( _, []).
+numbers_in_range( N, [Hd | Tl]):-
+    Hd =< N,
+    Hd >= 1,
+    numbers_in_range( N, Tl).
 
 valid_counts(N, counts(Top, Bottom, Left, Right)):-
-    valid_edge(N, Top),
-    valid_edge(N, Bottom),
-    valid_edge(N, Left),
-    valid_edge(N, Right).
+    numbers_in_range(N, Top),
+    numbers_in_range(N, Bottom),
+    numbers_in_range(N, Left),
+    numbers_in_range(N, Right).
 
-max_uptil_now( Row, Element, Boolean):-
-    reverse(Row, Reverse_Row),
-    sublist([Element | Tl], Reverse_Row), 
-    max_list([Element | Tl], Element),
-    Boolean = "True". 
+max_uptil_now( [Element | _], Element, Max, Boolean):-
+    Element > Max, 
+    Boolean = "True".
+    
+max_uptil_now( [Element | _], Element, Max, Boolean):-
+    Element < Max, 
+    Boolean = "False".
 
-max_uptil_now( Row, Element, Boolean):-
-    reverse(Row, Reverse_Row),
-    sublist([Element | Tl], Reverse_Row), 
-    max_list([Element | Tl], Max),
-    Max > Element,
-    Boolean = "False". 
+max_uptil_now( [Hd | Tl], Element, Max, Boolean):-
+    Hd > Max, 
+    Max1 is Hd, 
+    max_uptil_now(Tl, Element, Max1).
+
+max_uptil_now( [Hd | Tl], Element, Max, Boolean):-
+    Max < Hd, 
+    max_uptil_now(Tl, Element, Max, Boolean).
 
 helper( Row, [], 0).
-
 helper( Row, [Hd | Tl], Count):-
-    max_uptil_now(Row, Hd, Boolean),
-    Boolean = "True",
-    helper(Row, Tl, Count1),
-    Count is (Count1 + 1).
-
-helper( Row, [Hd | Tl], Count):-
-    max_uptil_now(Row, Hd, Boolean),
-    Boolean = "False",
-    helper(Row, Tl, Count).
-
+    max_uptil_now(Row, Hd, Count, )
 visible( Row, Count):-
    helper(Row, Row, Count).
+
 
 visibility( counts(Top, Bottom, Left, Right), Board):-
     maplist(visible, Board, Left),
@@ -107,5 +98,6 @@ visibility( counts(Top, Bottom, Left, Right), Board):-
 plain_tower( 0, [], counts([], [], [], [])).
 plain_tower( N, T, C):-
     number(N),
+    valid_counts(N, C),
     valid_board(N, T),
     visibility(C, T).
