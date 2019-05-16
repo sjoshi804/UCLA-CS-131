@@ -1,4 +1,4 @@
-% Defining the valid syntax for the counts data structure - depicting the visible counts for the edges
+% Defining the valid syntax for the counts data structure - depicting the visibile counts for the edges
 counts([], [], [], []).
 counts([_ | Top], [_ | Bottom], [_ | Left], [_ | Right]):- 
     counts(Top, Bottom, Left, Right). 
@@ -51,8 +51,7 @@ valid_board(N, Board):-
 
 numbers_in_range( _, []).
 numbers_in_range( N, [Hd | Tl]):-
-    Hd =< N,
-    Hd >= 1,
+    Hd <= N,
     numbers_in_range( N, Tl).
 
 valid_counts(N, counts(Top, Bottom, Left, Right)):-
@@ -61,42 +60,19 @@ valid_counts(N, counts(Top, Bottom, Left, Right)):-
     numbers_in_range(N, Left),
     numbers_in_range(N, Right).
 
-max_uptil_now( [Element | _], Element, Max, Boolean):-
-    Element > Max, 
-    Boolean = "True".
-    
-max_uptil_now( [Element | _], Element, Max, Boolean):-
-    Element < Max, 
-    Boolean = "False".
-
-max_uptil_now( [Hd | Tl], Element, Max, Boolean):-
-    Hd > Max, 
-    Max1 is Hd, 
-    max_uptil_now(Tl, Element, Max1).
-
-max_uptil_now( [Hd | Tl], Element, Max, Boolean):-
-    Max < Hd, 
-    max_uptil_now(Tl, Element, Max, Boolean).
-
-helper( Row, [], 0).
-helper( Row, [Hd | Tl], Count):-
-    max_uptil_now(Row, Hd, Count, )
-visible( Row, Count):-
-   helper(Row, Row, Count).
-
-
+visibile()
 visibility( counts(Top, Bottom, Left, Right), Board):-
-    maplist(visible, Board, Left),
+    visible(Left, Board),
     maplist(reverse, Board, Board_R),
-    maplist(visible, Board_R, Right),
-    transpose(Board, Board_T),
-    maplist(visible, Board_T, Top),
-    maplist(reverse, Board_T, Board_T_R),
-    maplist(visible, Board_T_R, Bottom).
+    visible(Right, Board_R),
+    transpose(Board, Board_T)
+    visible(Top, Board_T),
+    maplist(reverse, Board_T, Board_T_R)
+    visible(Bottom, Board_T_R).
 
 %Plain tower - solves without finite domain solver
-plain_tower( 0, [], counts([], [], [], [])).
-plain_tower( N, T, C):-
+plain_tower(0, [], counts([], [], [], [])).
+plain_tower(N, T, C):-
     number(N),
     valid_counts(N, C),
     valid_board(N, T),
