@@ -83,4 +83,7 @@ valid_board( N, Accumulator, [Row | Rest_Of_Rows], [Left_hd | Left_tl], [Right_h
     maplist(all_unique, M_T),
     valid_board(N, [Row | Accumulator], Rest_Of_Rows, Left_tl, Right_tl).
 
-
+ambiguous( N, C, T1, T2):-
+    plain_tower(N, C, T1),
+    plain_tower(N, C, T2),
+    \+ (T1, T2).
