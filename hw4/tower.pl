@@ -57,7 +57,6 @@ visibility( Board, Counts):-
 %Plain tower - solves without finite domain solver
 plain_tower( 0, [[]], counts([], [], [], [])).
 plain_tower( N, T, C):-
-    N > 0,
     C = counts(Top, Bottom, Left, Right),
     Board = T,
     length(Top, N),
@@ -118,12 +117,11 @@ ambiguous( N, C, T1, T2):-
 %Plain tower - solves without finite domain solver
 tower( 0, [[]], counts([], [], [], [])).
 tower( N, Board, C):-
-    N > 0,
     C = counts(Top, Bottom, Left, Right),
     %Check if all counts only have elements 1...N and have length N
     fd_valid_counts(N, C),
     %Constraints to generate a valid matrix (valid rows & valid cols)
-    length(Board, 5),
+    length(Board, N),
     maplist(fd_wrapper_domain(N), Board),
     maplist(fd_all_different, Board),
     transpose(Board, Board_T),
@@ -181,3 +179,31 @@ fd_count_visible( Max_Yet, [Hd | Tl], Count):-
 %Check visibility
 fd_visibility( Board, Counts):-
     maplist(fd_count_visible(0), Board, Counts).
+
+%Timing functions
+tower_test( Time) :-
+    statistics(cpu_time,[Start|_]),
+    tower(5, T, counts([2,2,3,5,1],[2,3,2,1,4],[3,1,2,3,2],[1,4,2,3,2])),
+    tower(5, T, C),
+    tower(N, T, C),
+    statistics(cpu_time, [Stop|_]),
+    Time is Stop - Start.
+    
+plain_tower_test( Time) :-
+    statistics(cpu_time, [Start|_]),
+    plain_tower(5, T, counts([2,2,3,5,1],[2,3,2,1,4],[3,1,2,3,2],[1,4,2,3,2])),
+    plain_tower(5, T, C),
+    plain_tower(N, T, C),
+    statistics(cpu_time, [Stop|_]),
+    Time is Stop - Start. 
+
+speedup_once( Ratio) :-
+    tower_test(Opt),
+    plain_tower_test(Naive),
+    Ratio is Naive/Opt, !.  
+
+speedup( Ratio):-
+    length(Ratio_List, 10),
+    maplist(speedup_once, Ratio_List),
+    sum_list(Ratio_List, Total),
+    Ratio is Total / 10.
