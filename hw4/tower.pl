@@ -55,7 +55,11 @@ visibility( Board, Counts):-
     maplist(count_visible(0), Board, Counts).
 
 %Plain tower - solves without finite domain solver
-plain_tower( 0, [[]], counts([], [], [], [])).
+plain_tower( 0, T, C):-
+    T = [[]],
+    C = counts([], [], [], []),
+    !.
+
 plain_tower( N, T, C):-
     C = counts(Top, Bottom, Left, Right),
     Board = T,
@@ -91,16 +95,13 @@ valid_board( N, Accumulator, [Row | Rest_Of_Rows], [Left_hd | Left_tl], [Right_h
     maplist(all_unique, M_T),
     valid_board(N, [Row | Accumulator], Rest_Of_Rows, Left_tl, Right_tl).
 
-%No-optimization for N < 3
-ambiguous( N, C, T1, T2):-
-    N < 3,
-    plain_tower(N, T1, C),
-    plain_tower(N, T2, C),
-    \+ (T1 = T2). 
+%Safety case for manual failure of 0
+ambiguous( 0, _, _, _):-
+    fail, !.
 
 %Sped-up version using random guess
 ambiguous( N, C, T1, T2):-
-    N >= 3,
+    \+ (N = 0),
     C = counts(_, [3| _], _, _),
     plain_tower(N, T1, C),
     plain_tower(N, T2, C),
@@ -108,14 +109,17 @@ ambiguous( N, C, T1, T2):-
 
 %Brute force search all possible answers for correctness
 ambiguous( N, C, T1, T2):-
-    N >= 3,
+    \+ (N = 0),
     tower(N, T1, C),
     tower(N, T2, C),
     \+ (T1 = T2), !.   
 
 %Solving tower - with fd solver
 %Plain tower - solves without finite domain solver
-tower( 0, [[]], counts([], [], [], [])).
+tower( 0, T, C):-
+    T = [[]],
+    C = counts([], [], [], []),
+    !.
 tower( N, Board, C):-
     C = counts(Top, Bottom, Left, Right),
     %Check if all counts only have elements 1...N and have length N
@@ -185,7 +189,7 @@ tower_test( Time) :-
     statistics(cpu_time,[Start|_]),
     tower(5, T, counts([2,2,3,5,1],[2,3,2,1,4],[3,1,2,3,2],[1,4,2,3,2])),
     tower(5, T, C),
-    tower(N, T, C),
+    tower(_, T, C),
     statistics(cpu_time, [Stop|_]),
     Time is Stop - Start.
     
@@ -193,7 +197,7 @@ plain_tower_test( Time) :-
     statistics(cpu_time, [Start|_]),
     plain_tower(5, T, counts([2,2,3,5,1],[2,3,2,1,4],[3,1,2,3,2],[1,4,2,3,2])),
     plain_tower(5, T, C),
-    plain_tower(N, T, C),
+    plain_tower(_, T, C),
     statistics(cpu_time, [Stop|_]),
     Time is Stop - Start. 
 
