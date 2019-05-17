@@ -2,10 +2,7 @@
 (define (expr-compare x y)
   (if (equal? x y) x 
     (if (not (and (pair? x) (pair? y))) `(if % ,x ,y)
-      (if (equal? (car x) (car y)) 
-        (cons (car x) (expr-compare (cdr x) (cdr y)) )
-        (cons `(if % ,(car x) ,(car y)) (expr-compare (cdr x) (cdr y)) )
-      )
+      (cons (expr-compare (car x) (car y)) (expr-compare (cdr x) (cdr y)) )
     )
   )
 )
