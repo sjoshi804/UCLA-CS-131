@@ -120,14 +120,64 @@ tower( 0, [[]], counts([], [], [], [])).
 tower( N, Board, C):-
     N > 0,
     C = counts(Top, Bottom, Left, Right),
+    %Check if all counts only have elements 1...N and have length N
     fd_valid_counts(N, C),
-    maplist(fd_all_d)
+    %Constraints to generate a valid matrix (valid rows & valid cols)
+    length(Board, 5),
+    maplist(fd_wrapper_domain(N), Board),
+    maplist(fd_all_different, Board),
     transpose(Board, Board_T),
+    maplist(fd_all_different, Board_T),
+    %Constraints for visibility
+    %Check Left
+    fd_visibility(Board, Left),
+    %Reverse and check Right
+    maplist(reverse, Board, Board_R),
+    fd_visibility(Board_R, Right),
+    %Check Top with Transpose
     fd_visibility(Board_T, Top),
-    reverse(Board_T, Board_T_R),
+    %Reverse and check Bottom
+    maplist(reverse, Board_T, Board_T_R),
     fd_visibility(Board_T_R, Bottom),
-    fd_labeling(C),
-    fd_labeling(Board).
+    %Label the counts first
+    fd_labeling(Left),
+    fd_labeling(Right),
+    fd_labeling(Top),
+    fd_labeling(Bottom),
+    % Finally label the board.
+    maplist(fd_labeling, Board).
 
-fd_valid_counts( N):-
-    maplist((#>))
+fd_wrapper_domain( N, Element):-
+    length(Element, N),
+    fd_domain(Element, 1, N).
+
+fd_valid_counts( N, counts(Top, Bottom, Left, Right)):-
+    length(Top, N),
+    length(Bottom, N),
+    length(Left, N),
+    length(Right, N),
+    fd_domain(Top, 1, N),
+    fd_domain(Bottom, 1, N),
+    fd_domain(Left, 1, N),
+    fd_domain(Right, 1, N).
+    
+%Counts the number of towers visible in a row looking from left to right
+%Base case
+fd_count_visible(_, [], 0).
+
+%First element is not visible -> Don't increment, Don't change Max_Yet
+fd_count_visible( Max_Yet, [Hd | Tl], Count):-
+    Max_Yet #> Hd,
+    fd_count_visible( Max_Yet, Tl, Count).
+
+%First element is visible -> Increment and update Max_Yet
+fd_count_visible( Max_Yet, [Hd | Tl], Count):-
+    Max_Yet #< Hd,
+    fd_count_visible(Hd, Tl, Count_minus_one),
+    Count is (Count_minus_one + 1). 
+    %Note Increment is done after recursion so that the binding given in the base case, cascades up 
+    %and is used. Wouldn't work in different order, despite commutativity of and. 
+
+%Check visibility
+fd_visibility( Board, Counts):-
+    maplist(fd_count_visible(0), Board, Counts).
