@@ -109,8 +109,8 @@ ambiguous( N, C, T1, T2):-
 %Brute force search all possible answers for correctness
 ambiguous( N, C, T1, T2):-
     N >= 3,
-    plain_tower(N, T1, C),
-    plain_tower(N, T2, C),
+    tower(N, T1, C),
+    tower(N, T2, C),
     \+ (T1 = T2), !.   
 
 %Solving tower - with fd solver
