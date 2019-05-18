@@ -16,7 +16,8 @@
 )
 ;if either is not a pair or only one has empty cdr -> don't recurse
 ;`((if % ,(car x) ,(car y)) ,(expr-compare (cdr x) (cdr y)))))
-;Schemish Pseudocode TODO: Unification of variables a!b TODO: if and quote special case
+;Schemish Pseudocode 
+;TODO: Unification of variables a!b TODO: lambda special case
 ;if (equal? x y) x 
 ;else if (equal? (car x) (car y)) recurse with (expr-compare (cdr x) (cdr y))
 ;else if (equal? (cdr x) (cdr y)) recurse with (expr-comare (car x) (car y))
