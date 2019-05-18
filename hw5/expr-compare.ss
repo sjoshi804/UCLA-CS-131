@@ -5,12 +5,19 @@
 
 ;Given a term and a dictionary returns the translated version of the term and if it's not in the dictionary return term
 (define (get_binding term dict)
-  term
+  (if (not (pair? dict)) term
+    (if (not (pair? (car dict))) (if (equal? (car  dict) term) (cdr dict) term)
+      (if (equal? (car (car dict)) term) (cdr (car dict)) (get_binding term (cdr dict)))
+  )
 )
 
 ;Given a term and a dictionary, return a new dictionary without that term's translation (if it exists) else return original dictionary
 (define (del_binding term dict)
-  dict
+  (if (not (pair? dict)) dict
+    (if (not (pair? (car dict))) (if (equal? (car dict) term) '() dict)
+      (if (equal? (car (car dict)) term) (cdr dict) (cons (car dict) (del_binding term (cdr dict)))) 
+    )
+  )
 )
 
 ;xor boolean function
