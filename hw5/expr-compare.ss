@@ -100,6 +100,8 @@
   ))))))
 )
 
+#| Function that tests the correctness of expr-compare |#
+;Ensures that the eval of expr-compare with % = #t === x and eval with % = #f === y
 (define (test-expr-compare x y)
   (and 
     (equal? (eval `(let ([% #t]) ,(expr-compare x y)))  (eval x))
@@ -107,5 +109,44 @@
   )
 )
 
+#| Custom test-cases for x and y to rigorously test all specifications 
+Conditions to test:
+  - 1 - if % x y when they don't match at all
+  - 2 - same ^ when they vary in number of arguments 
+  - 3 - combine booleans in desired manner
+  - 4 - can't combine if with function
+  - 5 - can't combine quote with anything but itself (check if combines w itself and also if not w any other)
+  - 6 - combine lambda and lambda to lambda
+  - 7 - combine lambda and λ into λ
+  - 8 - combine parameters of lambda into a!b form
+  - 9 - do not cascade combination of lambda into a sub lambda
+  - 10 - strings treated as different symbols 
+|#
 
+(define test-expr-x
+  '(+ 12                                                  ; Condition 1
+  (+ a b)                                                 ; Condition 2
+  (if (and #t #t #f) 2 3)                                 ; Condition 3
+  (if x y z)                                              ; Condition 4
+  (if (equal? (quote a) (quote a)) 1 0)                   ; Condition 5 - 1
+  (if (equal? (quote (b a)) (quote (b a))) 1 0)           ; Condition 5 - 2
+  (lambda (a b) (a b))                                    ; Condition 6
+  (lambda (a b) (a b))                                    ; Condition 7 and 8
+  (lambda (a b) (a (lambda (a b) a)))                     ; Condition 9
+  (if (equal? "abc" "abc") 1 0)                           ; Condition 10
+  )
+)
 
+(define test-expr-y
+  '(+ 20                                                  ; Condition 1
+  (+ a b c)                                               ; Condition 2
+  (if (and #t #f #t) 2 3)                                 ; Condition 3
+  (+ x y z)                                               ; Condition 4
+  (if (equal? (quote a) (quote a)) 1 0)                   ; Condition 5 - 1
+  (if (equal? (quote (b c)) (quote (b c))) 1 0)           ; Condition 5 - 2
+  (lambda (a b) (a b))                                    ; Condition 6
+  (λ (b a) (b a))                                         ; Condition 7 and 8
+  (lambda (b a) (b (lambda (a b) a)))                     ; Condition 9
+  (if (equal? "abd" "abc") 1 0)                           ; Condition 10
+  )
+)
