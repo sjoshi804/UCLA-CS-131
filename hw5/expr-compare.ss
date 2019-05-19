@@ -1,9 +1,3 @@
-#| 
-  TODO: Unification of variables a!b and lambda special case 
-  TODO: Deal with lambda special case in apply_dict i.e use del binding etc.
-  FIXME: Calling the unify x y at the right time
-|#
-
 #| Generic helper functions |#
 ;xor boolean function
 (define (xor a b)
@@ -39,20 +33,22 @@
 )
 
 ;Given a term and a dictionary, return a new dictionary without that term's translation (if it exists) else return original dictionary
-(define (del_binding term dict) 
+(define (del_binding term dict)
   (if (not (pair? dict)) dict
-    (if (not (pair? (car dict))) (if (equal? (car dict) term) '() dict) 
+    (if (not (pair? (car dict))) 
+      (if (equal? (car dict) term) 
+        (cons '() (cdr dict)) 
+        (del_binding term (cdr dict))
+      )
       (cons (del_binding term (car dict)) (del_binding term (cdr dict)))
   ))
- ; (if (not (pair? dict)) dict
- ;   (if (not (pair? (car dict))) (if (equal? (car dict) term) '() dict)
- ;     (if (equal? (car (car dict)) term) (cdr dict) (cons (car dict) (del_binding term (cdr dict)))) 
- ; ))
 )
 
 ;Takes a list of parameters for a sub lambda and deletes those bindings for those parameters
 (define (revise_dict parameters dict)
-  (if (not (pair? parameters)) (del_binding parameters dict) (del_binding (cdr parameters) (del_binding (car parameters) dict)))
+  (if (not (pair? parameters)) 
+    (del_binding parameters dict) 
+    (del_binding (cdr parameters) (del_binding (car parameters) dict)))
 )
 
 ;Takes the parameters of two lambda functions and returns pair of dictionaries (dict_x dict_y) that help unify common parameters //Do nothing if param_x and param_y are equal or if not equal length
@@ -75,7 +71,7 @@
 (define (apply_dict exp dict)
   (if (not (pair? exp)) (get_binding exp dict)
     (if (or (equal? (car exp) 'λ) (equal? (car exp) 'lambda))  
-      (cons (car exp) (apply_dict (cdr exp) (revise_dict (caddr exp) dict)))
+      (cons (car exp) (apply_dict (cdr exp) (revise_dict (cadr exp) dict)))
       (cons (apply_dict (car exp) dict) (apply_dict (cdr exp) dict))
   ))
 )
