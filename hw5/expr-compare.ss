@@ -43,6 +43,7 @@
       (cons (del_binding term (car dict)) (del_binding term (cdr dict)))
   ))
 )
+;I think this isn't working because i'm still checking like a link list not a real tree and seems to work cause i'm cutting off the offending branch ...
 
 ;Takes a list of parameters for a sub lambda and deletes those bindings for those parameters
 (define (revise_dict parameters dict)
