@@ -99,10 +99,3 @@
     
   ))))))
 )
-
-(expr-compare '((lambda (a) (eq? a ((λ (a b) ((λ (a b) (a b)) b a))
-                                    a (lambda (a) a))))
-                (lambda (b a) (b a)))
-              '((λ (a) (eqv? a ((lambda (b a) ((lambda (a b) (a b)) b a))
-                                a (λ (b) a))))
-                (lambda (a b) (a b))))
