@@ -39,11 +39,15 @@
 )
 
 ;Given a term and a dictionary, return a new dictionary without that term's translation (if it exists) else return original dictionary
-(define (del_binding term dict)
+(define (del_binding term dict) 
   (if (not (pair? dict)) dict
-    (if (not (pair? (car dict))) (if (equal? (car dict) term) '() dict)
-      (if (equal? (car (car dict)) term) (cdr dict) (cons (car dict) (del_binding term (cdr dict)))) 
+    (if (not (pair? (car dict))) (if (equal? (car dict) term) '() dict) 
+      (cons (del_binding term (car dict)) (del_binding term (cdr dict)))
   ))
+ ; (if (not (pair? dict)) dict
+ ;   (if (not (pair? (car dict))) (if (equal? (car dict) term) '() dict)
+ ;     (if (equal? (car (car dict)) term) (cdr dict) (cons (car dict) (del_binding term (cdr dict)))) 
+ ; ))
 )
 
 ;Takes a list of parameters for a sub lambda and deletes those bindings for those parameters
@@ -101,7 +105,6 @@
     
   ))))))
 )
-
 
 (expr-compare '((lambda (a) (eq? a ((λ (a b) ((λ (a b) (a b)) b a))
                                     a (lambda (a) a))))
