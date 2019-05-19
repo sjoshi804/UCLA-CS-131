@@ -99,3 +99,13 @@
     
   ))))))
 )
+
+(define (test-expr-compare x y)
+  (and 
+    (equal? (eval `(let ([% #t]) ,(expr-compare x y)))  (eval x))
+    (equal? (eval `(let ([% #f]) ,(expr-compare x y))) (eval y))
+  )
+)
+
+
+
