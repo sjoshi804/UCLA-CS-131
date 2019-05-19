@@ -1,0 +1,3 @@
+/Applications/Racket\ v7.3/bin/racket -f expr-compare.ss -f test.ss > my-output.ss
+diff -u expected-output.ss my-output.ss
+echo "Success"
