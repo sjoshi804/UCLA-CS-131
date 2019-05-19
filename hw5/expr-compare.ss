@@ -35,13 +35,10 @@
 ;Given a term and a dictionary, return a new dictionary without that term's translation (if it exists) else return original dictionary
 (define (del_binding term dict)
   (if (not (pair? dict)) dict
-    (if (not (pair? (car dict))) 
-      (if (equal? (car dict) term) 
-        (cons '() (cdr dict)) 
-        (del_binding term (cdr dict))
-      )
+    (if (not (pair? (car dict))) (if (equal? (car dict) term) '() (del_binding term (cdr dict)) )
       (cons (del_binding term (car dict)) (del_binding term (cdr dict)))
-  ))
+    )
+  )
 )
 ;I think this isn't working because i'm still checking like a link list not a real tree and seems to work cause i'm cutting off the offending branch ...
 
