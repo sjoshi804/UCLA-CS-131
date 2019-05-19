@@ -2,12 +2,16 @@
   TODO: Unification of variables a!b and lambda special case 
   FIXME: Calling the unify x y at the right time
 |#
+;Combine two symbols X Y into X!Y
+(define (combine_symbol x y)
+  (string->symbol (string-append (symbol->string x) "!" (symbol->string y))))
 
 ;Given a term and a dictionary returns the translated version of the term and if it's not in the dictionary return term
 (define (get_binding term dict)
   (if (not (pair? dict)) term
     (if (not (pair? (car dict))) (if (equal? (car  dict) term) (cdr dict) term)
       (if (equal? (car (car dict)) term) (cdr (car dict)) (get_binding term (cdr dict)))
+    )
   )
 )
 
@@ -37,14 +41,26 @@
 )
 
 ;Takes the parameters of two lambda functions and returns pair of dictionaries (dict_x dict_y) that help unify common parameters //Do nothing if param_x and param_y are equal or if not equal length
-(define (cons_dict param_x param_y dict_x dict_y) (cons dict_x dict_y))
+(define (cons_dict param_x param_y dict_x dict_y) 
+  (if (not (equal_length? param_x param_y)) (cons '() '()) ;not cons-ing with dict_x y as this is an edge case
+    (if (pair? param_x) 
+    (let ([car_x (car param_x)] [car_y (car param_y)] [cdr_x (cdr param_x)] [cdr_y (cdr param_y)])
+      (if (equal? car_x car_y) (cons_dict cdr_x cdr_y dict_x dict_y)
+        (cons_dict cdr_x cdr_y (cons (cons (combine_symbol car_x car_y) car_x) dict_x) 
+          (cons (cons (combine_symbol car_x car_y) car_y) dict_y))))
+      (if (equal? param_x param_y) (cons dict_x dict_y) 
+        (cons 
+          (cons (cons (combine_symbol param_x param_y) param_x) dict_x) 
+          (cons (cons (combine_symbol param_x param_y) param_y) dict_y)))
+  ))
+)
 
 ;Takes an expression and applies the dictionary's translations to it 
 ; If a lambda func appears, calls del_translation on its 
 (define (apply_dict exp dict) exp)
 
 ;Takes x and y and returns the unified versions of x and y
-(define (unify x y)
+(define (unify x y) 
 (let ([car_exp (unify_func_name (car x) (car y))])
 (
   (if (equal? car_exp 'NULL) (cons x y) 
@@ -54,6 +70,7 @@
     cons (apply_dict dict_x (cons car_exp (cdr x))) (apply_dict dict_y (cons car_exp (cdr y)))
   ))))))
 ))
+)
 
 ;Unifies variables according to rules first, then attempts to 
 (define (expr-compare x y)
