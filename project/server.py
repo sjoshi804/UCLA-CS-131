@@ -39,7 +39,7 @@ async def main():
         exit(code=1)
 
     elif (not (sys.argv[1] in SERVER_PORTS)):
-        print("Invalid server \n. Please choose a server from one of the following: Goloman, Hands, Holiday, Wilkes, Welsh")
+        print("Invalid server.\nPlease choose a server from one of the following: Goloman, Hands, Holiday, Wilkes, Welsh")
         exit(code=1)
     #If so then start 
     else:
@@ -47,13 +47,7 @@ async def main():
         CURRENT_SERVER = sys.argv[1]
         print("Starting " + CURRENT_SERVER)
         server = await asyncio.start_server(handle_connection, host=HOST, port=SERVER_PORTS[CURRENT_SERVER])
-        try:
-            await server.serve_forever()
-        except KeyboardInterrupt:
-            print("Keyboard interrupt")
-        finally:
-            await server.close()
-        exit(code=0)
+        await server.serve_forever()
 
 async def flood(message):
     for server in SERVER_LINKS[CURRENT_SERVER]:
@@ -139,4 +133,7 @@ async def handle_connection(reader, writer):
     
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+       print("Keyboard Interrupt")
