@@ -1,3 +1,7 @@
+# TODO: Check for valid coordinates
+# TODO: Meaningful error messages
+# TODO: Figure out the deal with new lines or not
+
 import asyncio
 import aiohttp
 import json
@@ -29,7 +33,7 @@ CLIENTS_LOCATION_DB = {}
 
 #API Details
 API_ENDPOINT = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius="
-API_KEY = "&key=AIzaSyCWz2RSNWFUQ50vykQU7VraPxbAl5LOSRs" #TODO: Billing
+API_KEY = "&key=AIzaSyCWz2RSNWFUQ50vykQU7VraPxbAl5LOSRs"
 
 async def api_call(radius):
     return API_ENDPOINT + str(radius * 1000) + API_KEY
@@ -47,7 +51,8 @@ async def main():
     else:
         global CURRENT_SERVER
         CURRENT_SERVER = sys.argv[1]
-        print("Starting " + CURRENT_SERVER)
+        logging.basicConfig(level=logging.INFO, filename= server_name + "-log" + ".txt")
+        logging.info("Starting server...")
         server = await asyncio.start_server(handle_connection, host=HOST, port=SERVER_PORTS[CURRENT_SERVER])
         await server.serve_forever()
 
@@ -58,14 +63,14 @@ async def flood(message):
             writer.write(message.encode())
             await writer.drain()
             writer.close()
-            print("Successfully send message to " + server)
+            logging.info("Successfully send message to " + server)
         except:
-           print("Couldn't send message to " + server)
+           logging.info("Couldn't send message to " + server)
 
 async def handle_connection(reader, writer):
     
     data = await reader.readline()
-    print("Received message: " + data.decode())
+    logging.info("Received message: " + data.decode())
     message = data.decode().split()
 
     if (message[0] == "IAMAT"):
@@ -76,7 +81,7 @@ async def handle_connection(reader, writer):
             longitude = message[2].split("-")[1]
             time_sent = message[3]
         except:
-            print("Invalid command")
+            logging.info("Invalid command")
             return 
 
         time_diff = time() - float(time_sent)
@@ -95,20 +100,20 @@ async def handle_connection(reader, writer):
         #check if client in database
         try:
             client_id = message[1]
-            radius = message[2]
-            num_results = message[3]
+            radius = int(message[2])
+            num_results = int(message[3])
             if (radius > 50):
-                print("Radius too large")
+                logging.info("Radius too large")
                 return
             if (num_results > 20):
-                print("Requesting too many results")
+                logging.info("Requesting too many results")
                 return
         except:
-            print("Invalid command")
+            logging.info("Invalid command")
             return
 
         if (client_id not in CLIENTS_LOCATION_DB):
-            print("Client not in db")
+            logging.info("Client not in db")
             return
         client_record = CLIENTS_LOCATION_DB[client_id]
         reply = "AT " + str(client_record[TIME_DIFF]) + " " + client_record[RECEIVER] + " " + client_id + " " + client_record[LATITUDE] + "-" + client_record[LONGITUDE] + " " + client_record[TIME_SENT] + "\n"        
@@ -118,8 +123,8 @@ async def handle_connection(reader, writer):
         async with aiohttp.ClientSession() as session:
             async with session.get(await api_call(radius)) as resp:
                 json_response = await resp.json()
-                json_response = json_response[:num_results]
-                json_reply = re.sub(r'( \\ n)+', r'\1',json.dumps(json_response, indent=3))
+                json_response["results"] = json_response["results"][:num_results]
+                json_reply = json.dumps(json_response, indent=3)
                 writer.write(json_reply.encode())
 
         #Cleanup
@@ -135,7 +140,7 @@ async def handle_connection(reader, writer):
             longitude = message[4].split("-")[1]
             time_sent = message[5]
         except:
-            print("Invalid command")
+            logging.info("Invalid command")
             return
         
         #Update information in db and flood if new info
@@ -143,10 +148,10 @@ async def handle_connection(reader, writer):
             CLIENTS_LOCATION_DB[client_id] = (receiver, time_diff, latitude, longitude, time_sent)
             await flood(data.decode())
         else:
-            print("Not forwarding")
+            logging.info("Not forwarding")
 
     else:
-        print("Invalid message")
+        logging.info("Invalid message")
     
     return
     
@@ -155,4 +160,5 @@ if __name__ == '__main__':
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-       print("Keyboard Interrupt")
+       logging.info("Keyboard Interrupt")
+       logging.info("Server closed")
