@@ -28,9 +28,11 @@ SERVER_LINKS = {GOLOMAN: [HANDS, HOLIDAY, WILKES], HANDS: [GOLOMAN, WILKES], HOL
 CLIENTS_LOCATION_DB = {}
 
 #API Details
-API_ENDPOINT = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=1500"
-API_KEY = "&key=AIzaSyAdP1UsAdTwQx55UxAM_oR-VWmh5GyTMpU" #FIXME: WRONG KEY FIX KEY
+API_ENDPOINT = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius="
+API_KEY = "&key=AIzaSyCWz2RSNWFUQ50vykQU7VraPxbAl5LOSRs" #TODO: Billing
 
+async def api_call(radius):
+    return API_ENDPOINT + str(radius * 1000) + API_KEY
 
 async def main():
     #Check if called with correct arguments
@@ -63,6 +65,7 @@ async def flood(message):
 async def handle_connection(reader, writer):
     
     data = await reader.readline()
+    print("Received message: " + data.decode())
     message = data.decode().split()
 
     if (message[0] == "IAMAT"):
@@ -72,9 +75,9 @@ async def handle_connection(reader, writer):
             latitude = message[2].split("-")[0]
             longitude = message[2].split("-")[1]
             time_sent = message[3]
-            print("Received message: " + data.decode())
         except:
             print("Invalid command")
+            return 
 
         time_diff = time() - float(time_sent)
         CLIENTS_LOCATION_DB[client_id] = (CURRENT_SERVER, time_diff, latitude, longitude, time_sent)
@@ -90,7 +93,20 @@ async def handle_connection(reader, writer):
 
     elif (message[0] == "WHATSAT"):
         #check if client in database
-        client_id = message[1]
+        try:
+            client_id = message[1]
+            radius = message[2]
+            num_results = message[3]
+            if (radius > 50):
+                print("Radius too large")
+                return
+            if (num_results > 20):
+                print("Requesting too many results")
+                return
+        except:
+            print("Invalid command")
+            return
+
         if (client_id not in CLIENTS_LOCATION_DB):
             print("Client not in db")
             return
@@ -100,9 +116,11 @@ async def handle_connection(reader, writer):
 
         #Make call to Places API
         async with aiohttp.ClientSession() as session:
-            async with session.get(API_ENDPOINT) as resp:
-                json_response = await resp.text()
-                writer.write(json_response.encode())
+            async with session.get(await api_call(radius)) as resp:
+                json_response = await resp.json()
+                json_response = json_response[:num_results]
+                json_reply = re.sub(r'( \\ n)+', r'\1',json.dumps(json_response, indent=3))
+                writer.write(json_reply.encode())
 
         #Cleanup
         await writer.drain()
@@ -118,6 +136,7 @@ async def handle_connection(reader, writer):
             time_sent = message[5]
         except:
             print("Invalid command")
+            return
         
         #Update information in db and flood if new info
         if ((client_id not in CLIENTS_LOCATION_DB) or (time_sent > CLIENTS_LOCATION_DB[client_id][TIME_SENT])):
