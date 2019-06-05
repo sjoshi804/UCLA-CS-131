@@ -1,7 +1,3 @@
-# TODO: Check for valid coordinates
-# TODO: Meaningful error messages
-# TODO: Figure out the deal with new lines or not
-
 import asyncio
 import aiohttp
 import json
@@ -51,10 +47,19 @@ async def main():
     else:
         global CURRENT_SERVER
         CURRENT_SERVER = sys.argv[1]
-        logging.basicConfig(level=logging.INFO, filename= server_name + "-log" + ".txt")
+        logging.basicConfig(level=logging.INFO, filename=CURRENT_SERVER + "-log" + ".txt")
         logging.info("Starting server...")
-        server = await asyncio.start_server(handle_connection, host=HOST, port=SERVER_PORTS[CURRENT_SERVER])
-        await server.serve_forever()
+        try:
+            server = await asyncio.start_server(handle_connection, host=HOST,port=SERVER_PORTS[CURRENT_SERVER])
+            logging.info("Server started successfully.")
+        except:
+            logging.info("Failed to start server")
+        try:
+            await server.serve_forever()
+        except KeyboardInterrupt:
+            logging.info("Server switching off.")
+        except:
+            logging.info("Server failed unexceptedly.")
 
 async def flood(message):
     for server in SERVER_LINKS[CURRENT_SERVER]:
@@ -63,14 +68,18 @@ async def flood(message):
             writer.write(message.encode())
             await writer.drain()
             writer.close()
-            logging.info("Successfully send message to " + server)
+            logging.info("Successfully forwarded message to " + server)
         except:
-           logging.info("Couldn't send message to " + server)
+           logging.info("Unable to forward message to " + server)
 
 async def handle_connection(reader, writer):
-    
-    data = await reader.readline()
-    logging.info("Received message: " + data.decode())
+    try:
+        data = await reader.readline()
+        logging.info("Received message: " + data.decode())
+    except:
+        logging.info("Unable to read message.")
+        return
+
     message = data.decode().split()
 
     if (message[0] == "IAMAT"):
@@ -79,19 +88,34 @@ async def handle_connection(reader, writer):
             client_id = message[1]
             latitude = message[2].split("-")[0]
             longitude = message[2].split("-")[1]
+            float(longitude)
+            float(latitude)
             time_sent = message[3]
         except:
-            logging.info("Invalid command")
-            return 
-
+            logging.info("Received command was invalid.")
+            reply = "? " + data.decode()
+            try:
+                writer.write(reply.encode())
+                await writer.drain()
+                writer.close()
+                logging.info("Informed client command was invalid.")
+            except:
+                logging.info("Unable to inform client that command was invalid.")
+                return
+            
         time_diff = time() - float(time_sent)
         CLIENTS_LOCATION_DB[client_id] = (CURRENT_SERVER, time_diff, latitude, longitude, time_sent)
         
         # Reply to client with AT message
         reply = "AT " + str(time_diff) + " " + CURRENT_SERVER + " " + client_id + " " + latitude + "-" + longitude + " " + time_sent + "\n"
-        writer.write(reply.encode())
-        await writer.drain()
-        writer.close()
+        try:
+            writer.write(reply.encode())
+            await writer.drain()
+            writer.close()
+            logging.info("Successfully replied to client: " + reply)
+        except:
+            logging.info("Unable to reply to client.")
+            return
 
         #Flood message
         await flood(reply)
@@ -102,34 +126,55 @@ async def handle_connection(reader, writer):
             client_id = message[1]
             radius = int(message[2])
             num_results = int(message[3])
-            if (radius > 50):
-                logging.info("Radius too large")
-                return
+            if (radius > 50 or radius < 0):
+                logging.info("Radius invalid")
+                assert(False)
             if (num_results > 20):
                 logging.info("Requesting too many results")
-                return
+                assert(False)
         except:
-            logging.info("Invalid command")
-            return
+            logging.info("Received command was invalid.")
+            reply = "? " + data.decode()
+            try:
+                writer.write(reply.encode())
+                await writer.drain()
+                writer.close()
+                logging.info("Informed client command was invalid.")
+            except:
+                logging.info("Unable to inform client that command was invalid.")
+                return
 
         if (client_id not in CLIENTS_LOCATION_DB):
-            logging.info("Client not in db")
+            logging.info("Client not in database.")
+            try:
+                writer.write(reply.encode())
+                await writer.drain()
+                writer.close()
+                logging.info("Informed client command was invalid.")
+            except:
+                logging.info("Unable to inform client that command was invalid.")
+                return
+        try:
+            client_record = CLIENTS_LOCATION_DB[client_id]
+            reply = "AT " + str(client_record[TIME_DIFF]) + " " + client_record[RECEIVER] + " " + client_id + " " + client_record[LATITUDE] + "-" + client_record[LONGITUDE] + " " + client_record[TIME_SENT] + "\n"        
+            writer.write(reply.encode())
+
+            #Make call to Places API
+            async with aiohttp.ClientSession() as session:
+                async with session.get(await api_call(radius)) as resp:
+                    json_response = await resp.json()
+                    json_response["results"] = json_response["results"][:num_results]
+                    json_reply = re.sub(r'\n+', '\n', json.dumps(json_response, indent=3))
+                    writer.write(json_reply.encode())
+                    writer.write("\n\n")
+
+            #Cleanup
+            await writer.drain()
+            writer.close()
+            logging.info("Successfully replied to client: " + reply)
+        except:
+            logging.info("Unable to make API request and reply to client.")
             return
-        client_record = CLIENTS_LOCATION_DB[client_id]
-        reply = "AT " + str(client_record[TIME_DIFF]) + " " + client_record[RECEIVER] + " " + client_id + " " + client_record[LATITUDE] + "-" + client_record[LONGITUDE] + " " + client_record[TIME_SENT] + "\n"        
-        writer.write(reply.encode())
-
-        #Make call to Places API
-        async with aiohttp.ClientSession() as session:
-            async with session.get(await api_call(radius)) as resp:
-                json_response = await resp.json()
-                json_response["results"] = json_response["results"][:num_results]
-                json_reply = json.dumps(json_response, indent=3)
-                writer.write(json_reply.encode())
-
-        #Cleanup
-        await writer.drain()
-        writer.close()
 
     elif (message[0] == "AT"):
         try:
@@ -140,19 +185,39 @@ async def handle_connection(reader, writer):
             longitude = message[4].split("-")[1]
             time_sent = message[5]
         except:
-            logging.info("Invalid command")
-            return
+            logging.info("Received command was invalid.")
+            reply = "? " + data.decode()
+            try:
+                writer.write(reply.encode())
+                await writer.drain()
+                writer.close()
+                logging.info("Informed client command was invalid.")
+            except:
+                logging.info("Unable to inform client that command was invalid.")
+                return
+            
         
         #Update information in db and flood if new info
         if ((client_id not in CLIENTS_LOCATION_DB) or (time_sent > CLIENTS_LOCATION_DB[client_id][TIME_SENT])):
             CLIENTS_LOCATION_DB[client_id] = (receiver, time_diff, latitude, longitude, time_sent)
+            logging.info("Flooding message.")
             await flood(data.decode())
         else:
-            logging.info("Not forwarding")
+            logging.info("Not flooding message.")
 
     else:
-        logging.info("Invalid message")
-    
+            logging.info("Received command was invalid.")
+            reply = "? " + data.decode()
+            try:
+                writer.write(reply.encode())
+                await writer.drain()
+                writer.close()
+                logging.info("Informed client command was invalid.")
+            except:
+                logging.info("Unable to inform client that command was invalid.")
+                return
+            
+
     return
     
 
