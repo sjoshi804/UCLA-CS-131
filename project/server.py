@@ -164,9 +164,8 @@ async def handle_connection(reader, writer):
                 async with session.get(await api_call(radius)) as resp:
                     json_response = await resp.json()
                     json_response["results"] = json_response["results"][:num_results]
-                    json_reply = re.sub(r'\n+', '\n', json.dumps(json_response, indent=3))
+                    json_reply = (re.sub(r'\n+', '\n', json.dumps(json_response, indent=3))) + "\n\n"
                     writer.write(json_reply.encode())
-                    writer.write("\n\n")
 
             #Cleanup
             await writer.drain()
