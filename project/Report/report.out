@@ -1,0 +1,9 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Design and Implementation specifics of Project Server Herd}{}% 2
+\BOOKMARK [1][-]{section.3}{Evaluation of asyncio Library}{}% 3
+\BOOKMARK [1][-]{section.4}{Python vs Java in Server Herd}{}% 4
+\BOOKMARK [2][-]{subsection.4.1}{Type Checking}{section.4}% 5
+\BOOKMARK [2][-]{subsection.4.2}{Memory Management}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.3}{Multithreading}{section.4}% 7
+\BOOKMARK [1][-]{section.5}{asyncio vs Node.js in Server Herd}{}% 8
+\BOOKMARK [1][-]{section.6}{Conclusion}{}% 9
