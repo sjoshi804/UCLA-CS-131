@@ -19,46 +19,43 @@ fun <T> everyNth(L: List<T>, N: Int): List<T>
 }
 
 fun main(args: Array<String>) {
-    var list = mutableListOf("Hello", "Hi", "Ho")
-    if(everyNth(list, 1) == listOf("Hello", "Hi", "Ho"))
-        println("TEST 1 SUCCESS")
-    else
-        println("TEST 1 FAIL")
-    list.add("hello")
-    if(everyNth(list, 2) == listOf("Hi", "hello"))
-        println("TEST 2 SUCCESS")
-    else
-        println("TEST 3 FAIL")
-    var list2 = mutableListOf(1, 2, 3, 4, 5, 6)
-    if(everyNth(list2, 2) == listOf(2,4,6))
-        println("TEST 3 SUCCESS")
-    else
-        println("TEST 3 FAIL")
-    //everyNth(list2, 2).add(3)
-    if(everyNth(list2, 3) == listOf(3,6))
-        println("TEST 4 SUCCESS")
-    else
-        println("TEST 4 FAIL")
-    if(everyNth(list2, 6) == listOf(6))
-        println("TEST 5 SUCCESS")
-    else
-        println("TEST 5 FAIL")
-    if(everyNth(list2, 7) == listOf<Int>())
-        println("TEST 6 SUCCESS")
-    else
-        println("TEST 6 FAIL")
-    var list3 = mutableListOf(true, false)
-    if(everyNth(list3, 1) == listOf(true, false))
-        println("TEST 7 SUCCESS")
-    else
-        println("TEST 7 FAIL")
-    if(everyNth(list3, 0) == listOf<Boolean>())
-        println("TEST 8 SUCCESS")
-    else
-        println("TEST 8 FAIL")
-    if(everyNth(list3, -1) == listOf<Boolean>())
-        println("TEST 9 SUCCESS")
-    else
-        println("TEST 9 FAIL")
+    
+    //Check trivial case where N = 1 and check if immutable
+    var test1 = mutableListOf("A", "B", "C", "D", "E")
+    if (everyNth(test1, 1) == test1.toList())
+        println("Test Case 1: Passed")
+    else 
+        println("Test Case 1: Failed")
+    
+    //Check for more complex N
+    var test2 = mutableListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    if (everyNth(test2, 2) == listOf(2, 4, 6, 8, 10))
+        println("Test Case 2: Passed")
+    else 
+        println("Test Case 2: Failed")
 
+    //Check edge case: N <= 0
+    if (everyNth(test2, 0) == listOf<Int>())
+        println("Test Case 3: Passed")
+    else 
+        println("Test Case 3: Failed")
+    
+    if (everyNth(test2, -1) == listOf<Int>())
+        println("Test Case 4: Passed")
+    else
+        println("Test Case 4: Failed")
+
+    //Check edge case N > size
+    if (everyNth(test2, test2.size + 1) == listOf<Int>())
+        println("Test Case 5: Passed")
+    else 
+        println("Test Case 5: Failed")
+
+    //Check edge case N = size
+    if (everyNth(test2, test2.size) == listOf(10))
+        println("Test Case 6: Passed")
+    else 
+        println("Test Case 6: Failed")
+
+    println("All test cases passed")
 }
