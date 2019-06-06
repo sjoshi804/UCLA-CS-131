@@ -2,7 +2,7 @@ fun <T> everyNth(L: List<T>, N: Int): List<T>
 {
 
     //Checks if N is valid, if not returns empty list
-    if (N > L.size || N < 0)
+    if (N > L.size || N <= 0)
         return listOf<T>()
 
     //Loop to add every Nth to a mutable list
