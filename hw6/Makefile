@@ -6,3 +6,6 @@ check:	make
 
 clean: 
 	rm hw6.jar *~
+
+build:
+	tar -czvf hw6.tar.gz hw6.kt Makefile
